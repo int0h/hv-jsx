@@ -8,28 +8,17 @@ interface Dict<T> {
     [key: string]: T;
 }
 
-type Props = Dict<any>;
-
-declare global {
-    namespace JSX {
-        type Element<P> = Component<P>;
-        type IntrinsicElements = {
-            [key: string]: any
-        };
-    }
-}
-
-// interface Component {
-//     render: () => {}
-// }
-
-const domMap = new Map();
+export type Props = Dict<any> | null;
 
 type PropType = HyperValue<any> | any;
+
 type PropsAbstract = Dict<any>;
 
-type Node = StringElm | HyperElm | HyperZone | null;
+export type Node = StringElm | HyperElm | HyperZone | null;
+
 type DomNode = Text | Element;
+
+const domMap = new Map();
 
 function replaceDom(newElm: DomNode, withElm: DomNode | null) {
     if (!withElm) {
@@ -50,13 +39,16 @@ class HyperElm {
 
     constructor (tagName: string, props: PropsAbstract, children: (Node | string)[]) {
         this.elm = document.createElement(tagName);
+        props = props || {};
         for (let name in props) {
             let value = props[name];
             if (value instanceof HyperValue) {
                 value.watch(newValue => {
                     this.elm.setAttribute(name, newValue);
                 });
-                value = value.g();
+                noRecord(() => {
+                    value = value.g()
+                });
             }
             this.elm.setAttribute(name, value);
         }
@@ -80,6 +72,27 @@ class StringElm {
 
     getDom(): DomNode {
         return this.node;
+    }
+}
+
+type ZoneResult = Node | string;
+
+class HyperZone {
+    hv: HyperValue<ZoneResult>;
+
+    constructor (content: () => ZoneResult) {
+        const notNullableContent = () => {
+            const res: ZoneResult = content();
+            return toNnElm(res);
+        }
+        this.hv = $autoHv(notNullableContent);
+        this.hv.watch((newElm, oldElm: Node) => {
+            replaceDom(getDom(str(newElm)), oldElm.getDom());
+        })
+    }
+
+    getDom(): DomNode {
+        return getDom(str(this.hv.g()));
     }
 }
 
@@ -108,51 +121,21 @@ function getDom(node: Node) {
     return node.getDom();
 }
 
-type ZoneResult = Node | string;
-
-class HyperZone {
-    hv: HyperValue<ZoneResult>;
-
-    constructor (content: () => ZoneResult) {
-        const notNullableContent = () => {
-            const res: ZoneResult = content();
-            return toNnElm(res);
-        }
-        this.hv = $autoHv(notNullableContent);
-        this.hv.watch((newElm, oldElm: Node) => {
-            replaceDom(getDom(str(newElm)), oldElm.getDom());
-        })
-    }
-
-    getDom(): DomNode {
-        return getDom(str(this.hv.g()));
-    }
-}
-
-function zone(content: () => ZoneResult) {
+export function zone(content: () => ZoneResult): HyperZone {
     return new HyperZone(content);
 }
 
-const cl = $hv('foo');
-window.cl = cl;
-document.documentElement.innerHTML = '';
+export function h(tagName: string, props: Dict<any>, ...children: (Node | string)[]): HyperElm {
+    return new HyperElm(tagName, props, children);
+}
 
-window.d= new HyperElm('div', {class: cl}, [
-    'hello',
-    zone(() => {
-        if (cl.g().length > 3) {
-            return ' long'
-        }
-        return null;
-    })
-]);
 
-document.body.appendChild(window.d.getDom());
-// throw '';
+// document.body.appendChild(window.d.getDom());
+// // throw '';
 // abstract class Component<P extends Dict<any>> {
 //     rootElm: Element;
 
-//     constructor (tagName: string, props: P, children: HyperElm<any>[]) {
+//     constructor (tagName: string, props: P, children: HyperElm[]) {
 
 //     }
 
@@ -160,7 +143,7 @@ document.body.appendChild(window.d.getDom());
 //         return this.render();
 //     }
 
-//     abstract render(): HyperElm<any>;
+//     abstract render(): HyperElm;
 // }
 
 

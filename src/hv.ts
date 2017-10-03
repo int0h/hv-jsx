@@ -1,4 +1,3 @@
-
 interface Watcher<T> {
     (newValue: T, oldValue: T): void;
 }
@@ -23,7 +22,8 @@ export class HyperValue<T> {
 
     g(): T {
         if (recordingHv) {
-            recordedHv.push(this);
+            const currentList = recordedHv[recordedHv.length - 1];
+            currentList.push(this);
         }
         if (this.updating) {
             return this.newValue;
@@ -88,17 +88,17 @@ export function $hc<T>(deps: HyperValue<any>[], fn: (params: HyperValue<any>[]) 
     return hv;
 }
 
-let recordedHv: HyperValue<any>[] = [];
+let recordedHv: HyperValue<any>[][] = [];
 let recordingHv = false;
 
 function hvRecordStart() {
-    recordedHv = [];
+    recordedHv.push([]);
     recordingHv = true;
 }
 
 function hvRecordStop() {
     recordingHv = false;
-    return recordedHv;
+    return recordedHv.pop();
 }
 
 export function noRecord(fn: () => void) {
@@ -110,11 +110,17 @@ export function noRecord(fn: () => void) {
 export function $autoHv<T>(fn: () => T): HyperValue<T> {
     hvRecordStart();
     const value = fn();
+    let deps = hvRecordStop();
     const hv = $hv(value);
-    const deps = hvRecordStop();
     for (let dep of deps) {
         dep.watch(() => {
-            hv.s(fn());
+            hvRecordStart();
+            const value = fn();
+            const newDeps = hvRecordStop().filter(newDep => {
+                return !deps.includes(newDep);
+            });
+            deps = deps.concat(newDeps);
+            hv.s(value);
         });
     }
     return hv;
