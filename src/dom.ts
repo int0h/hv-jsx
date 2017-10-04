@@ -1,4 +1,6 @@
 import {HyperValue, $hv, $autoHv, noRecord} from './hv';
+import {DomNode, appendChild, replaceDom} from './domHelpers';
+import {flatArray} from './utils';
 
 type Elm = {
     name: string;
@@ -10,38 +12,32 @@ interface Dict<T> {
 
 export type Props = Dict<any> | null;
 
-type PropType = HyperValue<any> | any;
+export type PropType = HyperValue<any> | any;
 
-type PropsAbstract = Dict<any>;
+export type PropsAbstract = Dict<any>;
 
-export type Node = StringElm | HyperElm | HyperZone | null;
+export type Node = StringElm | HyperElm | HyperZone;
 
-type DomNode = Text | Element;
+export type ChildNode = Node | string;
 
-const domMap = new Map();
-
-function replaceDom(newElm: DomNode, withElm: DomNode | null) {
-    if (!withElm) {
-        newElm.remove();
-    }
-    withElm.parentElement.replaceChild(newElm, withElm);
+export interface ContextMeta {
+    mapAttrs?: (attrs: PropsAbstract) => PropsAbstract;
 }
 
-function appendChild(parent: DomNode, elm: DomNode | null) {
-    if (elm === null) {
-        return;
-    }
-    parent.appendChild(elm);
+interface AbstractElement {
+    getDom(): DomNode;
 }
 
-class HyperElm {
+export class HyperElm implements AbstractElement {
     elm: Element;
 
-    constructor (tagName: string, props: PropsAbstract, children: (Node | string)[]) {
+    constructor (meta: ContextMeta, tagName: string, props: PropsAbstract, children: ChildNode[]) {
         this.elm = document.createElement(tagName);
         props = props || {};
-        for (let name in props) {
-            let value = props[name];
+        if (meta.mapAttrs) {
+            props = meta.mapAttrs(props);
+        }
+        for (let [name, value] of Object.entries(props)) {
             if (value instanceof HyperValue) {
                 value.watch(newValue => {
                     this.elm.setAttribute(name, newValue);
@@ -52,8 +48,9 @@ class HyperElm {
             }
             this.elm.setAttribute(name, value);
         }
+        children = flatArray(children);
         for (let child of children) {
-            const dom = getDom(str(child));
+            const dom = getDom(normalizeNode(child));
             appendChild(this.elm, dom);
         }
     }
@@ -63,7 +60,7 @@ class HyperElm {
     }
 }
 
-class StringElm {
+export class StringElm implements AbstractElement {
     node: Text;
 
     constructor (text: string) {
@@ -75,46 +72,39 @@ class StringElm {
     }
 }
 
-type ZoneResult = Node | string;
+export type ZoneResult = Node | string;
 
-class HyperZone {
+export class HyperZone implements AbstractElement {
     hv: HyperValue<ZoneResult>;
 
     constructor (content: () => ZoneResult) {
         const notNullableContent = () => {
             const res: ZoneResult = content();
-            return toNnElm(res);
+            return normalizeNode(res);
         }
         this.hv = $autoHv(notNullableContent);
         this.hv.watch((newElm, oldElm: Node) => {
-            replaceDom(getDom(str(newElm)), oldElm.getDom());
+            replaceDom(getDom(normalizeNode(newElm)), oldElm.getDom());
         })
     }
 
     getDom(): DomNode {
-        return getDom(str(this.hv.g()));
+        return getDom(normalizeNode(this.hv.g()));
     }
 }
 
-function str(text: string | Node) {
-    if (text === null) {
-        return null;
+export function normalizeNode(child: ChildNode): Node {
+    if (child === null) {
+        const scriptNode = new HyperElm({}, 'script', {}, []);
+        return scriptNode;
     }
-    if (typeof text === 'string') {
-        return new StringElm(text);
+    if (typeof child === 'string') {
+        return new StringElm(child);
     }
-    return text;
+    return child;
 }
 
-function toNnElm(elmLike: string | Node) {
-    if (elmLike !== null) {
-        return str(elmLike);
-    }
-    const scriptNode = new HyperElm('script', {}, []);
-    return scriptNode;
-}
-
-function getDom(node: Node) {
+export function getDom(node: Node) {
     if (node === null) {
         return null;
     }
@@ -125,30 +115,9 @@ export function zone(content: () => ZoneResult): HyperZone {
     return new HyperZone(content);
 }
 
-export function h(tagName: string, props: Dict<any>, ...children: (Node | string)[]): HyperElm {
-    return new HyperElm(tagName, props, children);
+export function h(meta: ContextMeta, tagName: string, props: Dict<any>, ...children: (Node | string)[]): HyperElm {
+    return new HyperElm(meta, tagName, props, children);
 }
 
 
-// document.body.appendChild(window.d.getDom());
-// // throw '';
-// abstract class Component<P extends Dict<any>> {
-//     rootElm: Element;
 
-//     constructor (tagName: string, props: P, children: HyperElm[]) {
-
-//     }
-
-//     protected getDom() {
-//         return this.render();
-//     }
-
-//     abstract render(): HyperElm;
-// }
-
-
-// type NodeType = string | any;
-
-// export function dom<P, T>(type: T, props: P, ...children: any[]): T {
-//     return {name: ''} as any as  T
-// }

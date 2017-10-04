@@ -1,4 +1,5 @@
-import {h, Node, Props} from './dom';
+import {h, Node, Props, ContextMeta} from './dom';
+import {component, CustomComponent} from './component';
 
 declare global {
     namespace JSX {
@@ -9,6 +10,22 @@ declare global {
     }
 }
 
-export function jsx(what: string, props: Props, ...children: Node[]) {
-    return h(what, props, ...children);
+function metaJsx(meta: ContextMeta, what: string | CustomComponent, props: Props, ...children: Node[]) {
+    if (typeof what === 'string') {
+        return h(meta, what, props, ...children);
+    }
+    return component(meta, what, props, ...children);
 }
+
+export function jsx(what: string | CustomComponent, props: Props, ...children: Node[]) {
+    return metaJsx({}, what, props, ...children);
+}
+
+export function bindMeta(meta: ContextMeta): typeof jsx {
+    return (what: string, props: Props, ...children: Node[]) => {
+        return metaJsx(meta, what, props, ...children);;
+    }
+}
+
+export type JsxFn = typeof jsx;
+
