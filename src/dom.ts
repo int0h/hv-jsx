@@ -1,14 +1,6 @@
 import {HyperValue, $hv, $autoHv, noRecord} from './hv';
 import {DomNode, appendChild, replaceDom} from './domHelpers';
-import {flatArray} from './utils';
-
-type Elm = {
-    name: string;
-}
-
-interface Dict<T> {
-    [key: string]: T;
-}
+import {flatArray, Dict} from './utils';
 
 export type Props = Dict<any> | null;
 

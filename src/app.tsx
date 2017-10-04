@@ -1,4 +1,4 @@
-import {$hv, $hc, $autoHv} from './hv';
+import {$hv, $hc, $autoHv, HyperValue} from './hv';
 import {zone} from './dom';
 import {bindMeta, JsxFn} from './jsx';
 import {Component} from './component';
@@ -6,13 +6,41 @@ import {Component} from './component';
 
 declare var window: {[key: string]: any};
 
-class Button extends Component {
+class Button extends Component<{}> {
+    init() {
+        this.on('click', 'btn', () => {console.log('fsa')})
+    }
+
     render (jsx: JsxFn) {
         return <button id="btn">
             {
                 this.children
             }
         </button>;
+    }
+}
+
+interface TextInputProps {
+    value: HyperValue<string>;
+    type: 'text'
+}
+
+type InputProps = TextInputProps;
+
+class Input extends Component<InputProps> {
+    init() {
+        this.on('input', 'self', (event) => {
+            const inputElm = event.target as HTMLInputElement;
+            this.props.value.s(inputElm.value);
+        });
+    }
+
+    render (jsx: JsxFn) {
+        const elmProps = {
+            ...this.props,
+            value: this.props.value.g()
+        }
+        return <input id="self" {...elmProps} />;
     }
 }
 
@@ -43,7 +71,16 @@ const shownItems = $autoHv(() => data.g());
 const jsx = bindMeta({
     mapAttrs: i => i
 });
+
+const name = $hv('Title');
+
 window.d = <div>
+    {
+        zone(() => (
+            <h1>{name.g()}</h1>
+        ))
+    }
+    <Input value={name} />
     <ul>
         {/* {
             zone(() => {

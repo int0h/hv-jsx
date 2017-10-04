@@ -10,14 +10,14 @@ declare global {
     }
 }
 
-function metaJsx(meta: ContextMeta, what: string | CustomComponent, props: Props, ...children: Node[]) {
+function metaJsx<P>(meta: ContextMeta, what: string | CustomComponent<P>, props: Props, ...children: Node[]) {
     if (typeof what === 'string') {
         return h(meta, what, props, ...children);
     }
     return component(meta, what, props, ...children);
 }
 
-export function jsx(what: string | CustomComponent, props: Props, ...children: Node[]) {
+export function jsx<P>(what: string | CustomComponent<P>, props: Props, ...children: Node[]) {
     return metaJsx({}, what, props, ...children);
 }
 
