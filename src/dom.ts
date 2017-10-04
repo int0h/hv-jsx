@@ -10,7 +10,7 @@ export type PropsAbstract = Dict<any>;
 
 export type Node = StringElm | HyperElm | HyperZone;
 
-export type ChildNode = Node | string;
+export type ChildNode = Node | string | number | HyperValue<Node | string | number>;
 
 export interface ContextMeta {
     mapAttrs?: (attrs: PropsAbstract) => PropsAbstract;
@@ -64,7 +64,7 @@ export class StringElm implements AbstractElement {
     }
 }
 
-export type ZoneResult = Node | string;
+export type ZoneResult = Node | string | number;
 
 export class HyperZone implements AbstractElement {
     hv: HyperValue<ZoneResult>;
@@ -92,6 +92,12 @@ export function normalizeNode(child: ChildNode): Node {
     }
     if (typeof child === 'string') {
         return new StringElm(child);
+    }
+    if (typeof child === 'number') {
+        return new StringElm(String(child));
+    }
+    if (child instanceof HyperValue) {
+        return zone(() => child.g());
     }
     return child;
 }

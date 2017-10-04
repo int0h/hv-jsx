@@ -112,16 +112,22 @@ export function $autoHv<T>(fn: () => T): HyperValue<T> {
     const value = fn();
     let deps = hvRecordStop();
     const hv = $hv(value);
-    for (let dep of deps) {
-        dep.watch(() => {
-            hvRecordStart();
-            const value = fn();
-            const newDeps = hvRecordStop().filter(newDep => {
-                return !deps.includes(newDep);
-            });
-            deps = deps.concat(newDeps);
-            hv.s(value);
+
+    const watcher = () => {
+        hvRecordStart();
+        const value = fn();
+        const newDeps = hvRecordStop().filter(newDep => {
+            return !deps.includes(newDep);
         });
+        deps = deps.concat(newDeps);
+        for (let dep of newDeps) {
+            dep.watch(watcher);
+        }
+        hv.s(value);
+    };
+
+    for (let dep of deps) {
+        dep.watch(watcher);
     }
     return hv;
 }

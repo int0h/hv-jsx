@@ -69,6 +69,12 @@ class App extends Component<{}>{
     list = $hv<Item[]>([]);
     shownItems = $autoHv(() => this.list.g());
     filter = $hv('all');
+    totalCount = $autoHv(() => this.list.g().length);
+    doneCount = $autoHv(() => {
+        return this.list.g().filter(i => {
+            return i.g().done.g()
+        }).length;
+    });
 
     init() {
         this.on('click', 'add-btn', () => this.addItem());
@@ -90,6 +96,9 @@ class App extends Component<{}>{
                 <Input value={this.currentText} />
                 <button id='add-btn'>Add</button>
             </div>
+            <h3>
+                Done {this.doneCount} / {this.totalCount}
+            </h3>
             {
                 zone(() => <ul>
                     {

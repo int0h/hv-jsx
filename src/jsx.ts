@@ -1,9 +1,9 @@
-import {h, Node, Props, ContextMeta} from './dom';
+import {h, Node, ChildNode, Props, ContextMeta} from './dom';
 import {component, CustomComponent} from './component';
 
 declare global {
     namespace JSX {
-        type Element<P> = any;
+        type Element<P> = Node;
         type IntrinsicElements = {
             [key: string]: any
         };
