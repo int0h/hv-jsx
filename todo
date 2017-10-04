@@ -4,7 +4,7 @@
     - move HV into separate repo
 
 - features
-    - interpret HV in children as zone
+    + interpret HV in children as zone
     + nested zones
     + components!
     - wrap component content in a zone
