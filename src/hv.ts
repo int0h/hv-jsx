@@ -132,3 +132,6 @@ export function $autoHv<T>(fn: () => T): HyperValue<T> {
     return hv;
 }
 
+export function wrapHv<I, O>(hv: HyperValue<I>, fn: (value: I) => O): HyperValue<O> {
+    return $hc([hv], ([hv]) => fn(hv.g()))
+}

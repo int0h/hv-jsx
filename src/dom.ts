@@ -1,4 +1,4 @@
-import {HyperValue, $hv, $autoHv, noRecord} from './hv';
+import {HyperValue, $hv, $autoHv, noRecord, wrapHv} from './hv';
 import {DomNode, appendChild, replaceDom} from './domHelpers';
 import {flatArray, Dict} from './utils';
 
@@ -18,14 +18,23 @@ export interface ContextMeta {
 
 interface AbstractElement {
     getDom(): DomNode;
+    renderDom(meta: ContextMeta): DomNode;
 }
 
 export class HyperElm implements AbstractElement {
     elm: Element;
+    tagName: string;
+    props: PropsAbstract;
+    children: ChildNode[];
 
-    constructor (meta: ContextMeta, tagName: string, props: PropsAbstract, children: ChildNode[]) {
-        this.elm = document.createElement(tagName);
-        props = props || {};
+    constructor (tagName: string, props: PropsAbstract, children: ChildNode[]) {
+        this.tagName = tagName;
+        this.props = props || {};
+        this.children = children;
+    }
+
+    private setAttrs(meta: ContextMeta) {
+        let props = this.props;
         if (meta.mapAttrs) {
             props = meta.mapAttrs(props);
         }
@@ -40,11 +49,21 @@ export class HyperElm implements AbstractElement {
             }
             this.elm.setAttribute(name, value);
         }
-        children = flatArray(children);
-        for (let child of children) {
-            const dom = getDom(normalizeNode(child));
+    }
+
+    private setChildren(meta: ContextMeta) {
+        this.children = flatArray(this.children);
+        for (let child of this.children) {
+            const dom = render(normalizeNode(child), meta);
             appendChild(this.elm, dom);
         }
+    }
+
+    renderDom(meta: ContextMeta) {
+        this.elm = document.createElement(this.tagName);
+        this.setAttrs(meta);
+        this.setChildren(meta);
+        return this.elm;
     }
 
     getDom(): DomNode {
@@ -53,10 +72,16 @@ export class HyperElm implements AbstractElement {
 }
 
 export class StringElm implements AbstractElement {
+    text: string;
     node: Text;
 
     constructor (text: string) {
-        this.node = document.createTextNode(text);
+        this.text = text;
+    }
+
+    renderDom(meta: ContextMeta) {
+        this.node = document.createTextNode(this.text);
+        return this.node;
     }
 
     getDom(): DomNode {
@@ -67,27 +92,29 @@ export class StringElm implements AbstractElement {
 export type ZoneResult = Node | string | number;
 
 export class HyperZone implements AbstractElement {
-    hv: HyperValue<ZoneResult>;
+    content: HyperValue<Node>;
+    dom: DomNode;
 
-    constructor (content: () => ZoneResult) {
-        const notNullableContent = () => {
-            const res: ZoneResult = content();
-            return normalizeNode(res);
-        }
-        this.hv = $autoHv(notNullableContent);
-        this.hv.watch((newElm, oldElm: Node) => {
-            replaceDom(getDom(normalizeNode(newElm)), oldElm.getDom());
+    constructor (content: HyperValue<ZoneResult>) {
+        this.content = wrapHv(content, normalizeNode);
+    }
+
+    renderDom(meta: ContextMeta): DomNode {
+        this.content.watch((newElm, oldElm: Node) => {
+            replaceDom(render(newElm, meta), oldElm.getDom());
         })
+        this.dom = render(this.content.g(), meta);
+        return this.dom;
     }
 
     getDom(): DomNode {
-        return getDom(normalizeNode(this.hv.g()));
+        return this.dom;
     }
 }
 
 export function normalizeNode(child: ChildNode): Node {
     if (child === null) {
-        const scriptNode = new HyperElm({}, 'script', {}, []);
+        const scriptNode = new HyperElm('script', {}, []);
         return scriptNode;
     }
     if (typeof child === 'string') {
@@ -97,7 +124,7 @@ export function normalizeNode(child: ChildNode): Node {
         return new StringElm(String(child));
     }
     if (child instanceof HyperValue) {
-        return zone(() => child.g());
+        return new HyperZone(child);
     }
     return child;
 }
@@ -109,12 +136,15 @@ export function getDom(node: Node) {
     return node.getDom();
 }
 
-export function zone(content: () => ZoneResult): HyperZone {
-    return new HyperZone(content);
+export function render(node: Node, meta: ContextMeta) {
+    if (node === null) {
+        return null;
+    }
+    return node.renderDom(meta);
 }
 
-export function h(meta: ContextMeta, tagName: string, props: Dict<any>, ...children: (Node | string)[]): HyperElm {
-    return new HyperElm(meta, tagName, props, children);
+export function h(tagName: string, props: Dict<any>, ...children: (Node | string)[]): HyperElm {
+    return new HyperElm(tagName, props, children);
 }
 
 

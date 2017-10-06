@@ -1,10 +1,11 @@
 import {$hv, $hc, $autoHv, HyperValue} from '../hv';
-import {zone} from '../dom';
-import {bindMeta, JsxFn, jsx} from '../jsx';
+import {} from '../dom';
+import {jsx} from '../jsx';
 import {Component} from '../component';
 
 
 declare var window: {[key: string]: any};
+window.arr =[];
 
 // components:
 
@@ -13,7 +14,7 @@ class Button extends Component<{}> {
         this.on('click', 'btn', () => {console.log('fsa')})
     }
 
-    render (jsx: JsxFn) {
+    render () {
         return <button id="btn">
             {
                 this.children
@@ -37,7 +38,7 @@ class Input extends Component<InputProps> {
         });
     }
 
-    render (jsx: JsxFn) {
+    render () {
         const elmProps = {
             ...this.props,
             value: this.props.value.g()
@@ -90,7 +91,7 @@ class App extends Component<{}>{
         this.list.s(this.list.g().concat(newItem));
     }
 
-    render(jsx: JsxFn) {
+    render() {
         return <div>
             <div class='add-panel'>
                 <Input value={this.currentText} />
@@ -100,7 +101,7 @@ class App extends Component<{}>{
                 Done {this.doneCount} / {this.totalCount}
             </h3>
             {
-                zone(() => <ul>
+                $autoHv(() => <ul>
                     {
                         this.shownItems.g().map((item, i) => (
                             <li class={hAlt(item.g().done, 'done', '')}>
@@ -118,4 +119,4 @@ class App extends Component<{}>{
 }
 
 const app = <App />;
-document.body.appendChild(app.getDom());
+document.body.appendChild(app.renderDom({}));

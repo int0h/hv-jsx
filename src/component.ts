@@ -1,7 +1,7 @@
 import {HyperValue} from './hv';
 import {PropsAbstract, normalizeNode, ZoneResult, Node, ContextMeta} from './dom';
 import {DomNode} from './domHelpers';
-import {jsx, bindMeta, JsxFn} from './jsx';
+import {jsx, JsxFn} from './jsx';
 import {flatArray} from './utils';
 import {DomEventEmitter, DomEventHandler} from './events';
 
@@ -23,6 +23,7 @@ function injectId(id: number) {
 }
 
 export abstract class Component<P extends PropsAbstract> {
+    dom: DomNode;
     hv: HyperValue<ZoneResult>;
     children: Node[];
     props: P;
@@ -41,12 +42,15 @@ export abstract class Component<P extends PropsAbstract> {
 
     init() {};
 
-    getDom(): DomNode {
-        const localJsx = bindMeta({
+    renderDom(): DomNode {
+        this.dom = this.render().renderDom({
             mapAttrs: injectId(this.id)
         });
-        const rendered = this.render(localJsx);
-        return rendered.getDom();
+        return this.dom;
+    }
+
+    getDom(): DomNode {
+        return this.dom;
     }
 
     on(eventType: string, targetId: string, handler: DomEventHandler) {
@@ -54,7 +58,7 @@ export abstract class Component<P extends PropsAbstract> {
 
     }
 
-    abstract render(jsx: JsxFn): Node;
+    abstract render(): Node;
 
     // private static getId() {
     //     if (this.id) {
@@ -70,7 +74,6 @@ export type CustomComponent<P> = {
 }
 
 export function component<P>(
-    meta: ContextMeta,
     componentClass: CustomComponent<P>,
     props: P,
     ...children: (Node | string)[]
