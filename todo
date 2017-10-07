@@ -5,5 +5,5 @@
     + interpret HV in children as zone
     + nested zones
     + components!
-    - wrap component content in a zone
+    + wrap component content in a zone
     - events of components

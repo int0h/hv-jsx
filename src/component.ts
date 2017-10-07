@@ -1,5 +1,5 @@
-import {HyperValue} from 'hv';
-import {PropsAbstract, normalizeNode, ZoneResult, Node, ContextMeta} from './dom';
+import {HyperValue, hvAuto} from 'hv';
+import {PropsAbstract, normalizeNode, ZoneResult, Node, ContextMeta, HyperZone} from './dom';
 import {DomNode} from './domHelpers';
 import {jsx, JsxFn} from './jsx';
 import {flatArray} from './utils';
@@ -43,7 +43,9 @@ export abstract class Component<P extends PropsAbstract> {
     init() {};
 
     renderDom(): DomNode {
-        this.dom = this.render().renderDom({
+        const domHv = hvAuto(() => this.render());
+        const domZone = new HyperZone(domHv);
+        this.dom = domZone.renderDom({
             mapAttrs: injectId(this.id)
         });
         return this.dom;

@@ -41,7 +41,7 @@ class Input extends Component<InputProps> {
     render () {
         const elmProps = {
             ...this.props,
-            value: this.props.value.g()
+            value: this.props.value.g(true)
         }
         return <input id="self" {...elmProps} />;
     }
