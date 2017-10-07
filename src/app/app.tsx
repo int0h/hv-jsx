@@ -1,4 +1,5 @@
 import {$hv, $hc, $autoHv, HyperValue} from '../hv';
+import {HvArray} from '../hvHelpers'
 import {} from '../dom';
 import {jsx} from '../jsx';
 import {Component} from '../component';
@@ -54,6 +55,11 @@ type Item = HyperValue<{
     done: HyperValue<boolean>;
 }>;
 
+type ItemRaw = {
+    text: HyperValue<string>;
+    done: HyperValue<boolean>;
+};
+
 function createItem(text: string): Item {
     return $hv({
         text: $hv(text),
@@ -67,15 +73,22 @@ function hAlt(condition: HyperValue<boolean>, ifTrue: any, ifFalse: any) {
 
 class App extends Component<{}>{
     currentText = $hv('');
-    list = $hv<Item[]>([]);
+    //list = $hv<Item[]>([]);
+    list = new HvArray<ItemRaw>([]);
     shownItems = $autoHv(() => this.list.g());
     filter = $hv('all');
-    totalCount = $autoHv(() => this.list.g().length);
-    doneCount = $autoHv(() => {
-        return this.list.g().filter(i => {
-            return i.g().done.g()
-        }).length;
-    });
+    //totalCount = 0;
+    totalCount = this.list.getLength();
+    doneCount = this.list
+        .filter(value => {
+            return value.done
+        })
+        .getLength();
+    // doneCount = $autoHv(() => {
+    //     return this.list.g().filter(i => {
+    //         return i.g().done.g()
+    //     }).length;
+    // });
 
     init() {
         this.on('click', 'add-btn', () => this.addItem());
@@ -88,7 +101,7 @@ class App extends Component<{}>{
 
     addItem() {
         const newItem = createItem(this.currentText.g());
-        this.list.s(this.list.g().concat(newItem));
+        this.list.push(newItem);
     }
 
     render() {
