@@ -1,4 +1,4 @@
-import {HyperValue} from './hv';
+import {HyperValue} from 'hv';
 import {PropsAbstract, normalizeNode, ZoneResult, Node, ContextMeta} from './dom';
 import {DomNode} from './domHelpers';
 import {jsx, JsxFn} from './jsx';

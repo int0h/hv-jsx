@@ -1,4 +1,4 @@
-import {HyperValue, $hv, $autoHv, noRecord, wrapHv} from './hv';
+import {HyperValue, hvMake, hvAuto, wrapHv} from 'hv';
 import {DomNode, appendChild, replaceDom} from './domHelpers';
 import {flatArray, Dict} from './utils';
 
@@ -43,9 +43,7 @@ export class HyperElm implements AbstractElement {
                 value.watch(newValue => {
                     this.elm.setAttribute(name, newValue);
                 });
-                noRecord(() => {
-                    value = value.g()
-                });
+                value = value.g(true);
             }
             this.elm.setAttribute(name, value);
         }

@@ -1,5 +1,4 @@
-import {$hv, $hc, $autoHv, HyperValue} from '../hv';
-import {HvArray} from '../hvHelpers'
+import {hvMake, hvEval, hvAuto, HyperValue, HvArray} from 'hv';
 import {} from '../dom';
 import {jsx} from '../jsx';
 import {Component} from '../component';
@@ -61,22 +60,22 @@ type ItemRaw = {
 };
 
 function createItem(text: string): Item {
-    return $hv({
-        text: $hv(text),
-        done: $hv(false)
+    return hvMake({
+        text: hvMake(text),
+        done: hvMake(false)
     });
 }
 
 function hAlt(condition: HyperValue<boolean>, ifTrue: any, ifFalse: any) {
-    return $autoHv(() => condition.g() ? ifTrue : ifFalse);
+    return hvAuto(() => condition.g() ? ifTrue : ifFalse);
 }
 
 class App extends Component<{}>{
-    currentText = $hv('');
+    currentText = hvMake('');
     //list = $hv<Item[]>([]);
     list = new HvArray<ItemRaw>([]);
-    shownItems = $autoHv(() => this.list.g());
-    filter = $hv('all');
+    shownItems = hvAuto(() => this.list.g());
+    filter = hvMake('all');
     //totalCount = 0;
     totalCount = this.list.getLength();
     doneCount = this.list
@@ -114,7 +113,7 @@ class App extends Component<{}>{
                 Done {this.doneCount} / {this.totalCount}
             </h3>
             {
-                $autoHv(() => <ul>
+                hvAuto(() => <ul>
                     {
                         this.shownItems.g().map((item, i) => (
                             <li class={hAlt(item.g().done, 'done', '')}>
