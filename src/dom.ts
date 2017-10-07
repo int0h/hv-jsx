@@ -144,6 +144,3 @@ export function render(node: Node, meta: ContextMeta) {
 export function h(tagName: string, props: Dict<any>, ...children: (Node | string)[]): HyperElm {
     return new HyperElm(tagName, props, children);
 }
-
-
-

@@ -1,7 +1,5 @@
--tests
-
-- arch
-    - move HV into separate repo
++ arch
+    + move HV into separate repo
 
 - features
     + interpret HV in children as zone

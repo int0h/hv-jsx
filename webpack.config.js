@@ -8,6 +8,11 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
+            },
+            {
+                test: /\.js$/,
+                use: ["source-map-loader"],
+                enforce: "pre"
             }
         ]
     },

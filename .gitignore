@@ -2,3 +2,4 @@ node_modules
 src/app.ts
 public/images
 public/bundle.js
+npm-debug.log
