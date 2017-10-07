@@ -1,23 +1,39 @@
 import {HyperValue, $hv, $autoHv, $hc} from './hv';
 
-type IterationFunc<T, R> = (value: T, index: number, array: T[]) => R;
+type IterationFunc<T, R> = (value: T, index: number) => R | HyperValue<R>;
+type IterationFuncStrict<T, R> = (value: HyperValue<T>, index: number) => R;
+type ReduceFunc<T> = (acc: any, value: T, index: number) => any;
 
-class HvArray<T> extends HyperValue<HyperValue<T>[]> {
+function injectGet<T, R>(fn: IterationFunc<T, R>): IterationFuncStrict<T, R> {
+    return function(hv: HyperValue<T>, index) {
+        let result = fn(hv.g(), index);
+        if (result instanceof HyperValue) {
+            result = result.g();
+        }
+        return result;
+    };
+}
+
+export class HvArray<T> extends HyperValue<HyperValue<T>[]> {
 
     constructor (sourceArray: HyperValue<T>[]) {
-        super();
+        super(sourceArray);
+    }
+
+    static fromHv<T>(hv: HyperValue<HyperValue<T>[]>): HvArray<T> {
+        let hvArray = new HvArray<T>([]);
+        hvArray.bind([hv], () => hv.g());
+        return hvArray;
     }
 
     private getItems(): T[] {
         return this.g().map(item => item.g());
     }
 
-    get length () {
-        return this.g().length;
-    }
-
-    set length (newLength: number) {
-        throw new Error('not supported');
+    getLength (): HyperValue<number> {
+        return $autoHv(() => {
+            return this.g().length
+        });
     }
 
     // mutators:
@@ -67,22 +83,16 @@ class HvArray<T> extends HyperValue<HyperValue<T>[]> {
         return newHv;
     }
 
-    includes(value: HyperValue<T>, fromIndex?: number): HyperValue<boolean> {
-        return $hc([this], () => this.g().includes(value, fromIndex));
-    }
-
-    indexOf(value: HyperValue<T>, fromIndex?: number): HyperValue<number> {
-        return $hc([this], () => this.g().indexOf(value, fromIndex));
-    }
-
-    lastIndexOf(value: HyperValue<T>, fromIndex?: number): HyperValue<number> {
-        return $hc([this], () => this.g().lastIndexOf(value, fromIndex));
-    }
-
-    slice(start?: number, end?: number): HvArray<T> {
+    slice(start?: number | HyperValue<number>, end?: number | HyperValue<number>): HvArray<T> {
+        if (!(start instanceof HyperValue)) {
+            start = $hv(start);
+        }
+        if (!(end instanceof HyperValue)) {
+            end = $hv(end);
+        }
         const newHv = new HvArray<T>([]);
-        newHv.bind([this], () => {
-            return this.g().slice(start, end);
+        newHv.bind([this, start, end], ([self, start, end]) => {
+            return self.g().slice(start.g(), end.g());
         });
         newHv.calc();
         return newHv;
@@ -96,19 +106,38 @@ class HvArray<T> extends HyperValue<HyperValue<T>[]> {
         return result;
     }
 
-    every(fn: IterationFunc<HyperValue<T>, boolean>, thisArg?: any): HyperValue<boolean> {
-        return $autoHv(() => this.g().every(fn, thisArg));
+    every(fn: IterationFunc<T, boolean>, thisArg?: any): HyperValue<boolean> {
+        return $autoHv(() => this.g().every(injectGet(fn), thisArg));
     }
 
-    some(fn: IterationFunc<HyperValue<T>, boolean>, thisArg?: any): HyperValue<boolean> {
-        return $autoHv(() => this.g().some(fn, thisArg));
+    some(fn: IterationFunc<T, boolean>, thisArg?: any): HyperValue<boolean> {
+        return $autoHv(() => this.g().some(injectGet(fn), thisArg));
     }
 
-    filter(fn: IterationFunc<HyperValue<T>, boolean>, thisArg?: any): HvArray<T> {
-        const filtred = this.g().filter(fn, thisArg);
-        return new HvArray(filtred);
+    filter(fn: IterationFunc<T, boolean>, thisArg?: any): HvArray<T> {
+        const hv = $autoHv(() => this.g().filter(injectGet(fn), thisArg));
+        return HvArray.fromHv(hv);
     }
 
+    map<R>(fn: IterationFunc<T, R>, thisArg?: any): HyperValue<R[]> {
+        return $autoHv(() => this.g().map(injectGet(fn), thisArg));
+    }
 
+    reduce(fn: ReduceFunc<T>, initialValue?: any): HyperValue<any> {
+        return $autoHv(() => {
+            return this.g().reduce((acc, curHv, index) => {
+                const val = curHv.g();
+                return fn(acc, val, index);
+            }, initialValue);
+        });
+    }
+
+    find(fn: IterationFunc<T, boolean>, thisArg?: any): HyperValue<T> {
+        return $autoHv(() => this.g().find(injectGet(fn), thisArg).g());
+    }
+
+    findIndex(fn: IterationFunc<T, boolean>, thisArg?: any): HyperValue<number> {
+        return $autoHv(() => this.g().findIndex(injectGet(fn), thisArg));
+    }
 
 }
