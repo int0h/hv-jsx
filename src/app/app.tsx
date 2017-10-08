@@ -41,7 +41,7 @@ class Input extends Component<InputProps> {
     render () {
         const elmProps = {
             ...this.props,
-            value: this.props.value.g(true)
+            value: this.props.value
         }
         return <input id="self" {...elmProps} />;
     }
@@ -126,9 +126,13 @@ class App extends Component<{}>{
                     }
                 </ul>)
             }
+            <svg height="100" width="100">
+                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+                Sorry, your browser does not support inline SVG.
+            </svg>
         </div>
     }
 }
 
 const app = <App />;
-document.body.appendChild(app.renderDom({}));
+document.body.appendChild(app.renderDom({ns: 'html'}));

@@ -7,3 +7,6 @@
     + components!
     + wrap component content in a zone
     - events of components
+    + use .attr or setAttribute depending on namespace
+    + namespaces
+    - consider not using both (.attr and setAttr for html namespace)

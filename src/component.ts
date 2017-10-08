@@ -42,10 +42,11 @@ export abstract class Component<P extends PropsAbstract> {
 
     init() {};
 
-    renderDom(): DomNode {
+    renderDom(meta: ContextMeta): DomNode {
         const domHv = hvAuto(() => this.render());
         const domZone = new HyperZone(domHv);
         this.dom = domZone.renderDom({
+            ns: meta.ns,
             mapAttrs: injectId(this.id)
         });
         return this.dom;

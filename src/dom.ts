@@ -1,5 +1,5 @@
 import {HyperValue, hvMake, hvAuto, wrapHv} from 'hv';
-import {DomNode, appendChild, replaceDom} from './domHelpers';
+import {DomNode, appendChild, replaceDom, createElm, guessNs, setAttr, XmlNamespace} from './domHelpers';
 import {flatArray, Dict} from './utils';
 
 export type Props = Dict<any> | null;
@@ -14,6 +14,7 @@ export type ChildNode = Node | string | number | HyperValue<Node | string | numb
 
 export interface ContextMeta {
     mapAttrs?: (attrs: PropsAbstract) => PropsAbstract;
+    ns: XmlNamespace;
 }
 
 interface AbstractElement {
@@ -41,11 +42,11 @@ export class HyperElm implements AbstractElement {
         for (let [name, value] of Object.entries(props)) {
             if (value instanceof HyperValue) {
                 value.watch(newValue => {
-                    this.elm.setAttribute(name, newValue);
+                    setAttr(this.elm, name, newValue, meta.ns);
                 });
                 value = value.g(true);
             }
-            this.elm.setAttribute(name, value);
+            setAttr(this.elm, name, value, meta.ns);
         }
     }
 
@@ -58,7 +59,9 @@ export class HyperElm implements AbstractElement {
     }
 
     renderDom(meta: ContextMeta) {
-        this.elm = document.createElement(this.tagName);
+        const ns = guessNs(this.tagName, meta.ns);
+        meta = {...meta, ns};
+        this.elm = createElm(ns, this.tagName);
         this.setAttrs(meta);
         this.setChildren(meta);
         return this.elm;
