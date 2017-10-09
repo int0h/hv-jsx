@@ -1,4 +1,4 @@
-import {HyperValue, hvMake, hvAuto, wrapHv} from 'hv';
+import {HyperValue, hvMake, hvAuto, hvWrap} from 'hv';
 import {DomNode, appendChild, replaceDom, createElm, guessNs, setAttr, XmlNamespace} from './domHelpers';
 import {flatArray, Dict} from './utils';
 
@@ -97,7 +97,7 @@ export class HyperZone implements AbstractElement {
     dom: DomNode;
 
     constructor (content: HyperValue<ZoneResult>) {
-        this.content = wrapHv(content, normalizeNode);
+        this.content = hvWrap(content, normalizeNode);
     }
 
     renderDom(meta: ContextMeta): DomNode {
