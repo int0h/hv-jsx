@@ -1,4 +1,4 @@
-import {hvMake, hvEval, hvAuto, HyperValue, HvArray} from 'hv';
+import {hvMake, hvAuto, HyperValue} from 'hv';
 import {} from '../dom';
 import {jsx} from '../jsx';
 import {Component} from '../component';
@@ -72,17 +72,16 @@ function hAlt(condition: HyperValue<boolean>, ifTrue: any, ifFalse: any) {
 
 class App extends Component<{}>{
     currentText = hvMake('');
-    //list = $hv<Item[]>([]);
-    list = new HvArray<ItemRaw>([]);
+    list = hvMake<Item[]>([]);
     shownItems = hvAuto(() => this.list.g());
     filter = hvMake('all');
-    //totalCount = 0;
-    totalCount = this.list.getLength();
-    doneCount = this.list
+    totalCount = hvAuto(() => this.list.g().length);
+    doneCount = hvAuto(() => this.list.g()
         .filter(value => {
-            return value.done
+            return value.g().done.g()
         })
-        .getLength();
+        .length
+    );
     // doneCount = $autoHv(() => {
     //     return this.list.g().filter(i => {
     //         return i.g().done.g()
@@ -100,7 +99,7 @@ class App extends Component<{}>{
 
     addItem() {
         const newItem = createItem(this.currentText.g());
-        this.list.push(newItem);
+        this.list.s(this.list.g().concat(newItem));
     }
 
     render() {
@@ -136,5 +135,3 @@ class App extends Component<{}>{
 
 const app = <App />;
 document.body.appendChild(app.renderDom({ns: 'html'}));
-
-import './autoOnly';
