@@ -32,18 +32,46 @@ type InputProps = TextInputProps;
 
 class Input extends Component<InputProps> {
     init() {
-        this.on('input', 'self', (event) => {
+        const fn = (event: Event) => {
             const inputElm = event.target as HTMLInputElement;
             this.props.value.s(inputElm.value);
-        });
+        };
+        this.on('input', 'self', fn);
+        this.on('click', 'self', fn);
+        this.on('change', 'self', fn);
     }
 
+    handler = (event: Event) => {
+        const inputElm = event.target as HTMLInputElement;
+        this.props.value.s(inputElm.value);
+    };
+
     render () {
-        const elmProps = {
+        let elmProps = {
             ...this.props,
             value: this.props.value
         }
-        return <input id="self" {...elmProps} />;
+        return <input id="self" {...elmProps} onclick={this.handler} />;
+    }
+}
+
+
+interface CheckboxInputProps {
+    value: HyperValue<boolean>;
+}
+
+class Checkbox extends Component<CheckboxInputProps> {
+    handler = (event: Event) => {
+        const inputElm = event.target as HTMLInputElement;
+        this.props.value.s(inputElm.checked);
+    };
+
+    render () {
+        let elmProps = {
+            ...this.props,
+            checked: this.props.value
+        }
+        return <input id="self" type='checkbox' {...elmProps} onclick={this.handler} />;
     }
 }
 
@@ -72,22 +100,19 @@ function hAlt(condition: HyperValue<boolean>, ifTrue: any, ifFalse: any) {
 
 class App extends Component<{}>{
     currentText = hvMake('');
-    //list = $hv<Item[]>([]);
     list = new HvArray<ItemRaw>([]);
-    shownItems = hvAuto(() => this.list.g());
-    filter = hvMake('all');
-    //totalCount = 0;
+    shownItems = hvAuto(() => this.list.g().filter(item => {
+        return item.g().done.g() && this.showDone.g()
+            || !item.g().done.g() && this.showUndone.g();
+    }));
+    showDone = hvMake(true);
+    showUndone = hvMake(true);
     totalCount = this.list.getLength();
     doneCount = this.list
         .filter(value => {
             return value.done
         })
         .getLength();
-    // doneCount = $autoHv(() => {
-    //     return this.list.g().filter(i => {
-    //         return i.g().done.g()
-    //     }).length;
-    // });
 
     init() {
         this.on('click', 'add-btn', () => this.addItem());
@@ -99,15 +124,18 @@ class App extends Component<{}>{
     }
 
     addItem() {
-        const newItem = createItem(this.currentText.g());
+        const newItem = createItem(this.currentText.g() || 'Unnamed item');
         this.list.push(newItem);
     }
 
     render() {
-        return <div>
+        return <div class='app'>
+            <h2>
+                To-do list
+            </h2>
             <div class='add-panel'>
-                <Input value={this.currentText} />
-                <button id='add-btn'>Add</button>
+                <Input class='edit' placeholder='Type here...' value={this.currentText} />
+                <button class='add-button' id='add-btn'>Add</button>
             </div>
             <h3>
                 Done {this.doneCount} / {this.totalCount}
@@ -116,20 +144,27 @@ class App extends Component<{}>{
                 hvAuto(() => <ul>
                     {
                         this.shownItems.g().map((item, i) => (
-                            <li class={hAlt(item.g().done, 'done', '')}>
-                                {
-                                    item.g().text.g()
-                                }
-                                <button id='done' data-id={i}>Done!</button>
+                            <li class={hAlt(item.g().done, 'item item_done', 'item')}>
+                            {/* <li class={hAlt(item.g().done, 'done', '')}> */}
+                                <span class='item-text'>
+                                    {
+                                        item.g().text.g()
+                                    }
+                                </span>
+                                <label class='item__do-label'>
+                                    Done: <Checkbox id='done' value={item.g().done}/>
+                                </label>
                             </li>
                         ))
                     }
                 </ul>)
             }
-            <svg height="100" width="100">
-                <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
-                Sorry, your browser does not support inline SVG.
-            </svg>
+            <label class='item__do-label'>
+                Show done: <Checkbox id='done' value={this.showDone}/>
+            </label>
+            <label class='item__do-label'>
+                Show undone: <Checkbox id='done' value={this.showUndone}/>
+            </label>
         </div>
     }
 }
@@ -137,4 +172,4 @@ class App extends Component<{}>{
 const app = <App />;
 document.body.appendChild(app.renderDom({ns: 'html'}));
 
-import './autoOnly';
+//import './autoOnly';
