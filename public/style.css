@@ -47,15 +47,16 @@ ul {
 }
 
 .add-button {
-    border: 2px solid #82ca82;
-    color: #76b976;
-    font-weight: bold;
+    border: 1px solid #82ca82;
+    color: #6dad6d;
+    font-weight: 100;
     cursor: pointer;
     padding: 5px 15px;
 }
 
 .add-button:hover {
     outline: #82ca82 solid 1px;
+    background: rgba(109, 173, 109, 0.1);
 }
 
 .item {
