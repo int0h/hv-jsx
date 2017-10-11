@@ -101,10 +101,10 @@ function hAlt(condition: HyperValue<boolean>, ifTrue: any, ifFalse: any) {
 class App extends Component<{}>{
     currentText = hvMake('');
     list = new HvArray<ItemRaw>([]);
-    shownItems = hvAuto(() => this.list.g().filter(item => {
-        return item.g().done.g() && this.showDone.g()
-            || !item.g().done.g() && this.showUndone.g();
-    }));
+    shownItems = this.list.filter(item => {
+        return item.done.g() && this.showDone.g()
+            || !item.done.g() && this.showUndone.g();
+    });
     showDone = hvMake(true);
     showUndone = hvMake(true);
     totalCount = this.list.getLength();
@@ -141,23 +141,25 @@ class App extends Component<{}>{
                 Done {this.doneCount} / {this.totalCount}
             </h3>
             {
-                hvAuto(() => <ul>
-                    {
-                        this.shownItems.g().map((item, i) => (
-                            <li class={hAlt(item.g().done, 'item item_done', 'item')}>
-                            {/* <li class={hAlt(item.g().done, 'done', '')}> */}
-                                <span class='item-text'>
-                                    {
-                                        item.g().text.g()
-                                    }
-                                </span>
-                                <label class='item__do-label'>
-                                    Done: <Checkbox id='done' value={item.g().done}/>
-                                </label>
-                            </li>
-                        ))
-                    }
-                </ul>)
+                hvAuto(() =>
+                    <ul>
+                        {
+                            this.shownItems.g().map((item, i) => (
+                                <li class={hAlt(item.g().done, 'item item_done', 'item')}>
+                                {/* <li class={hAlt(item.g().done, 'done', '')}> */}
+                                    <span class='item-text'>
+                                        {
+                                            item.g().text.g()
+                                        }
+                                    </span>
+                                    <label class='item__do-label'>
+                                        Done: <Checkbox id='done' value={item.g().done}/>
+                                    </label>
+                                </li>
+                            ))
+                        }
+                    </ul>
+                )
             }
             <label class='item__do-label'>
                 Show done: <Checkbox id='done' value={this.showDone}/>
