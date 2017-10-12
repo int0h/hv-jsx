@@ -1,10 +1,10 @@
-import {componentTable, Component} from './component';
+import {componentTable} from './component';
 import {getAllParents, Dict} from './utils';
 
 let listenedEventTypes: string[] = [];
 
 function listenGlobal(eventType: string) {
-    if (listenedEventTypes.includes(eventType)) {
+    if (listenedEventTypes.indexOf(eventType) !== -1) {
         return;
     }
     listenedEventTypes.push(eventType);

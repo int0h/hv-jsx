@@ -6,11 +6,17 @@ const nsTable = {
     svg: 'http://www.w3.org/2000/svg'
 };
 
-export function replaceDom(newElm: DomNode, oldElm: DomNode | null) {
+export function replaceDom(newElm: DomNode, oldElm: DomNode) {
     if (!oldElm) {
         newElm.remove();
     }
-    oldElm.parentElement.replaceChild(newElm, oldElm);
+    const parent = oldElm.parentElement;
+
+    if (!parent) {
+        throw new Error('cannot replace dom');
+    }
+
+    parent.replaceChild(newElm, oldElm);
 }
 
 export function appendChild(parent: DomNode, elm: DomNode | null) {

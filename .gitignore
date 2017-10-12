@@ -1,5 +1,4 @@
 node_modules
-src/app.ts
-public/images
-public/bundle.js
+dist
+types
 npm-debug.log

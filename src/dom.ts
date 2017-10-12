@@ -1,23 +1,23 @@
-import {HyperValue, hvMake, hvAuto, hvWrap} from 'hv';
+import {HyperValue, hvWrap} from 'hv';
 import {DomNode, appendChild, replaceDom, createElm, guessNs, setAttr, XmlNamespace} from './domHelpers';
 import {flatArray, Dict} from './utils';
 
-export type Props = Dict<any> | null;
+export type Props = Dict<any>;
 
 export type PropType = HyperValue<any> | any;
 
 export type PropsAbstract = Dict<any>;
 
-export type Node = StringElm | HyperElm | HyperZone;
+export type HvNode = AbstractElement;
 
-export type ChildNode = Node | string | number | HyperValue<Node | string | number>;
+export type ChildNode = HvNode | string | number | HyperValue<HvNode | string | number>;
 
 export interface ContextMeta {
     mapAttrs?: (attrs: PropsAbstract) => PropsAbstract;
     ns: XmlNamespace;
 }
 
-interface AbstractElement {
+export interface AbstractElement {
     getDom(): DomNode;
     renderDom(meta: ContextMeta): DomNode;
 }
@@ -39,7 +39,8 @@ export class HyperElm implements AbstractElement {
         if (meta.mapAttrs) {
             props = meta.mapAttrs(props);
         }
-        for (let [name, value] of Object.entries(props)) {
+        for (let name in props) {
+            let value = props[name];
             if (value instanceof HyperValue) {
                 value.watch(newValue => {
                     setAttr(this.elm, name, newValue, meta.ns);
@@ -90,10 +91,10 @@ export class StringElm implements AbstractElement {
     }
 }
 
-export type ZoneResult = Node | string | number;
+export type ZoneResult = HvNode | string | number;
 
 export class HyperZone implements AbstractElement {
-    content: HyperValue<Node>;
+    content: HyperValue<HvNode>;
     dom: DomNode;
 
     constructor (content: HyperValue<ZoneResult>) {
@@ -101,7 +102,7 @@ export class HyperZone implements AbstractElement {
     }
 
     renderDom(meta: ContextMeta): DomNode {
-        this.content.watch((newElm, oldElm: Node) => {
+        this.content.watch((newElm, oldElm) => {
             replaceDom(render(newElm, meta), oldElm.getDom());
         })
         this.dom = render(this.content.g(), meta);
@@ -113,7 +114,7 @@ export class HyperZone implements AbstractElement {
     }
 }
 
-export function normalizeNode(child: ChildNode): Node {
+export function normalizeNode(child: ChildNode): HvNode {
     if (child === null) {
         const scriptNode = new HyperElm('script', {}, []);
         return scriptNode;
@@ -130,20 +131,14 @@ export function normalizeNode(child: ChildNode): Node {
     return child;
 }
 
-export function getDom(node: Node) {
-    if (node === null) {
-        return null;
-    }
+export function getDom(node: HvNode) {
     return node.getDom();
 }
 
-export function render(node: Node, meta: ContextMeta) {
-    if (node === null) {
-        return null;
-    }
+export function render(node: HvNode, meta: ContextMeta) {
     return node.renderDom(meta);
 }
 
-export function h(tagName: string, props: Dict<any>, ...children: (Node | string)[]): HyperElm {
+export function h(tagName: string, props: Dict<any>, ...children: (HvNode | string)[]): HyperElm {
     return new HyperElm(tagName, props, children);
 }

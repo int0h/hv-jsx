@@ -1,11 +1,9 @@
 import {HyperValue, hvAuto} from 'hv';
-import {PropsAbstract, normalizeNode, ZoneResult, Node, ContextMeta, HyperZone} from './dom';
+import {PropsAbstract, normalizeNode, ZoneResult, HvNode, ContextMeta, HyperZone} from './dom';
 import {DomNode} from './domHelpers';
-import {jsx, JsxFn} from './jsx';
 import {flatArray} from './utils';
 import {DomEventEmitter, DomEventHandler} from './events';
 
-let componentClassTable: typeof Component[] = [];
 export let componentTable: Component<any>[] = [];
 
 function injectId(id: number) {
@@ -25,12 +23,12 @@ function injectId(id: number) {
 export abstract class Component<P extends PropsAbstract> {
     dom: DomNode;
     hv: HyperValue<ZoneResult>;
-    children: Node[];
+    children: HvNode[];
     props: P;
     id: number;
     domEe: DomEventEmitter;
 
-    constructor (props: P, children: (Node | string)[]) {
+    constructor (props: P, children: (HvNode | string)[]) {
         children = flatArray(children);
         this.children = children.map(child => normalizeNode(child));
         this.props = props;
@@ -61,7 +59,7 @@ export abstract class Component<P extends PropsAbstract> {
 
     }
 
-    abstract render(): Node;
+    abstract render(): HvNode;
 
     // private static getId() {
     //     if (this.id) {
@@ -73,13 +71,13 @@ export abstract class Component<P extends PropsAbstract> {
 }
 
 export type CustomComponent<P> = {
-    new (props: PropsAbstract, children: (Node | string)[]): Component<P>;
+    new (props: PropsAbstract, children: (HvNode | string)[]): Component<P>;
 }
 
 export function component<P>(
     componentClass: CustomComponent<P>,
     props: P,
-    ...children: (Node | string)[]
+    ...children: (HvNode | string)[]
 ) {
     return new componentClass(props, children);
 }
