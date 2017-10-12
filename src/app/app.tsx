@@ -2,78 +2,11 @@ import {hvMake, hvEval, hvAuto, HyperValue, HvArray} from 'hv';
 import {} from '../dom';
 import {jsx} from '../jsx';
 import {Component} from '../component';
-
+import {TextInput} from './inputs/textInput';
+import {Checkbox} from './inputs/checkBox';
 
 declare var window: {[key: string]: any};
 window.arr =[];
-
-// components:
-
-class Button extends Component<{}> {
-    init() {
-        this.on('click', 'btn', () => {console.log('fsa')})
-    }
-
-    render () {
-        return <button id="btn">
-            {
-                this.children
-            }
-        </button>;
-    }
-}
-
-interface TextInputProps {
-    value: HyperValue<string>;
-    type: 'text'
-}
-
-type InputProps = TextInputProps;
-
-class Input extends Component<InputProps> {
-    init() {
-        const fn = (event: Event) => {
-            const inputElm = event.target as HTMLInputElement;
-            this.props.value.s(inputElm.value);
-        };
-        this.on('input', 'self', fn);
-        this.on('click', 'self', fn);
-        this.on('change', 'self', fn);
-    }
-
-    handler = (event: Event) => {
-        const inputElm = event.target as HTMLInputElement;
-        this.props.value.s(inputElm.value);
-    };
-
-    render () {
-        let elmProps = {
-            ...this.props,
-            value: this.props.value
-        }
-        return <input id="self" {...elmProps} onclick={this.handler} />;
-    }
-}
-
-
-interface CheckboxInputProps {
-    value: HyperValue<boolean>;
-}
-
-class Checkbox extends Component<CheckboxInputProps> {
-    handler = (event: Event) => {
-        const inputElm = event.target as HTMLInputElement;
-        this.props.value.s(inputElm.checked);
-    };
-
-    render () {
-        let elmProps = {
-            ...this.props,
-            checked: this.props.value
-        }
-        return <input id="self" type='checkbox' {...elmProps} onclick={this.handler} />;
-    }
-}
 
 // model:
 
@@ -134,7 +67,7 @@ class App extends Component<{}>{
                 To-do list
             </h2>
             <div class='add-panel'>
-                <Input class='edit' placeholder='Type here...' value={this.currentText} />
+                <TextInput class='edit' placeholder='Type here...' value={this.currentText} />
                 <button class='add-button' id='add-btn'>Add</button>
             </div>
             <h3>

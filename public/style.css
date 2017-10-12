@@ -14,6 +14,7 @@ input:focus, button:focus {
 button, input {
     background: none;
     border: none;
+    -webkit-appearance: none;
 }
 
 ul {
@@ -86,4 +87,37 @@ ul {
 
 .item-text {
     width: 100%;
+}
+
+.tick {
+    width: 1em;
+    height: 1em;
+    stroke: #888;
+    stroke-width: 0.5px;
+    visibility: hidden;
+}
+
+.check-box.checked .tick {
+    visibility: visible;
+}
+
+.check-box {
+    border: 1px solid #888;
+    position: relative;
+    width: 1em;
+    height: 1em;
+    display: inline-flex;
+    bottom: -0.25em;
+}
+
+.check-box input {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* bottom: 0; */
+    /* right: 0; */
+    width: 100%;
+    height: 100%;
+    margin: 0;
 }
