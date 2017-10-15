@@ -1,6 +1,7 @@
 import {HyperValue, hvWrap} from 'hv';
 import {DomNode, appendChild, replaceDom, createElm, guessNs, setAttr, XmlNamespace} from './domHelpers';
 import {flatArray, Dict} from './utils';
+import {styleMapper} from './style';
 
 export type Props = Dict<any>;
 
@@ -12,6 +13,14 @@ export type HvNode = AbstractElement;
 
 export type ChildNode = HvNode | string | number | HyperValue<HvNode | string | number>;
 
+interface RefProps {
+    [name: string]: (value: any, target: HyperElm) => void;
+};
+
+const refProps: RefProps = {
+    style: styleMapper
+}
+
 export interface ContextMeta {
     mapAttrs?: (attrs: PropsAbstract) => PropsAbstract;
     ns: XmlNamespace;
@@ -22,11 +31,16 @@ export interface AbstractElement {
     renderDom(meta: ContextMeta): DomNode;
 }
 
+export interface Ref {
+    (elm: HyperElm): void;
+}
+
 export class HyperElm implements AbstractElement {
     elm: Element;
     tagName: string;
     props: PropsAbstract;
     children: ChildNode[];
+    ref: Ref;
 
     constructor (tagName: string, props: PropsAbstract, children: ChildNode[]) {
         this.tagName = tagName;
@@ -36,10 +50,18 @@ export class HyperElm implements AbstractElement {
 
     private setAttrs(meta: ContextMeta) {
         let props = this.props;
+        if (props.ref) {
+            props = {...this.props};
+            this.ref = props.ref;
+            delete props.ref;
+        }
         if (meta.mapAttrs) {
             props = meta.mapAttrs(props);
         }
         for (let name in props) {
+            if (name in refProps) {
+                continue;
+            }
             let value = props[name];
             if (value instanceof HyperValue) {
                 value.watch(newValue => {
@@ -59,12 +81,25 @@ export class HyperElm implements AbstractElement {
         }
     }
 
+    private handleRefProps() {
+        for (let key in this.props) {
+            if (key in refProps) {
+                const value = this.props[key];
+                refProps[key](value, this);
+            }
+        }
+    }
+
     renderDom(meta: ContextMeta) {
         const ns = guessNs(this.tagName, meta.ns);
         meta = {...meta, ns};
         this.elm = createElm(ns, this.tagName);
         this.setAttrs(meta);
         this.setChildren(meta);
+        this.handleRefProps();
+        if (this.ref) {
+            this.ref(this);
+        }
         return this.elm;
     }
 

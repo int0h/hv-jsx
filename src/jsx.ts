@@ -1,5 +1,6 @@
-import {h, HvNode, Props} from './dom';
+import {h, HvNode, Props, Ref} from './dom';
 import {component, CustomComponent, Component} from './component';
+import {HyperStyle} from './style';
 
 declare global {
     namespace JSX {
@@ -11,7 +12,11 @@ declare global {
             props: any;
         }
         type IntrinsicElements = {
-            [key: string]: any
+            [key: string]: {
+                [name: string]: any;
+                style?: HyperStyle;
+                ref?: Ref;
+            };
         }
     }
 }
