@@ -1,6 +1,6 @@
 import {HyperValue, hvAuto} from 'hv';
 import {PropsAbstract, normalizeNode, ZoneResult, HvNode, ContextMeta, HyperZone} from './dom';
-import {DomNode} from './domHelpers';
+import {DomNode, setAttr} from './domHelpers';
 import {flatArray} from './utils';
 import {DomEventEmitter, DomEventHandler} from './events';
 
@@ -15,7 +15,8 @@ function injectId(id: number) {
             ...attrs,
             'data-hv-id': id + ':' + attrs.id
         };
-        delete newAttrs.id;
+        // todo consider me
+        // delete newAttrs.id;
         return newAttrs;
     }
 }
@@ -47,6 +48,7 @@ export abstract class Component<P extends PropsAbstract> {
             ns: meta.ns,
             mapAttrs: injectId(this.id)
         });
+        setAttr(this.dom as Element, 'data-hv-comp-id', this.id, meta.ns);
         return this.dom;
     }
 
@@ -80,4 +82,18 @@ export function component<P>(
     ...children: (HvNode | string)[]
 ) {
     return new componentClass(props, children);
+}
+
+export function closestComponent<T extends Component<any>>(dom: DomNode): T | null {
+    let elem = (dom as HTMLElement | null);
+    while (true) {
+        if (!elem) {
+            return null;
+        }
+        const id = elem.dataset && elem.dataset.hvCompId;
+        if (id !== undefined) {
+            return componentTable[Number(id)] as T;
+        }
+        elem = elem.parentElement;
+    }
 }
