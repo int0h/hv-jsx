@@ -44,12 +44,26 @@ export function createElm(ns: XmlNamespace, tagName: string) {
     return document.createElementNS(nsTable[ns], tagName);
 }
 
-export function guessNs(tagName: string, currentNs: XmlNamespace): XmlNamespace {
+export interface XmlNamespaces {
+    selfNs: XmlNamespace;
+    childNs: XmlNamespace;
+}
+
+export function guessNs(tagName: string, currentNs: XmlNamespace): XmlNamespaces {
     if (tagName === 'svg') {
-        return 'svg';
+        return {
+            selfNs: 'svg',
+            childNs: 'svg'
+        };
     }
     if (tagName === 'foreignObject') {
-        return 'html';
+        return {
+            selfNs: 'svg',
+            childNs: 'html'
+        }
     }
-    return currentNs;
+    return {
+        selfNs: currentNs,
+        childNs: currentNs
+    };
 }

@@ -91,11 +91,12 @@ export class HyperElm implements AbstractElement {
     }
 
     renderDom(meta: ContextMeta) {
-        const ns = guessNs(this.tagName, meta.ns);
-        meta = {...meta, ns};
-        this.elm = createElm(ns, this.tagName);
+        const {selfNs, childNs} = guessNs(this.tagName, meta.ns);
+        const nestedMeta = {...meta, ns: childNs};
+        meta = {...meta, ns: selfNs};
+        this.elm = createElm(meta.ns, this.tagName);
         this.setAttrs(meta);
-        this.setChildren(meta);
+        this.setChildren(nestedMeta);
         this.handleRefProps();
         if (this.ref) {
             this.ref(this);
