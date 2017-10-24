@@ -1,4 +1,4 @@
-import {componentTable} from './component';
+import {componentTable} from './blocks/component';
 import {getAllParents, Dict} from './utils';
 
 let listenedEventTypes: string[] = [];

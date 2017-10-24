@@ -1,8 +1,9 @@
 import {HyperValue, hvAuto} from 'hv';
-import {PropsAbstract, normalizeNode, ZoneResult, HvNode, ContextMeta, HyperZone} from './dom';
-import {DomNode, setAttr} from './domHelpers';
-import {flatArray} from './utils';
-import {DomEventEmitter, DomEventHandler} from './events';
+import {PropsAbstract, normalizeNode, HvNode, ContextMeta} from './common';
+import {ZoneResult, HyperZone} from './zone';
+import {DomNode, setAttr} from '../domHelpers';
+import {flatArray} from '../utils';
+import {DomEventEmitter, DomEventHandler} from '../events';
 
 export let componentTable: Component<any>[] = [];
 

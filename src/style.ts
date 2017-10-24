@@ -1,5 +1,5 @@
 import {HyperValue} from 'hv';
-import {HyperElm} from './dom';
+import {HyperElm} from './blocks/element';
 
 export type HyperStyle = {
     [name in keyof CSSStyleDeclaration]?: string | null | HyperValue<string | null> | undefined;

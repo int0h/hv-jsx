@@ -1,5 +1,5 @@
-import {h, HvNode, Props, Ref} from './dom';
-import {component, CustomComponent, Component} from './component';
+import {h, HvNode, Props, Ref} from './blocks/common';
+import {component, CustomComponent, Component} from './blocks/component';
 import {HyperStyle} from './style';
 
 declare global {
