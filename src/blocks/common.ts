@@ -20,13 +20,13 @@ export type HvNode = AbstractElement;
 
 export type ChildNode = HvNode | string | number | HyperValue<HvNode | string | number>;
 
-export type TargetNode = {} & As<'target-node'>;
+export type TargetNode = any;
 
-export type TargetMeta = {} & As<'target-meta'>;
+export type TargetMeta = any;
 
-export type TargetPosition = {} & As<'target-position'>;
+export type TargetPosition = any;
 
-export type TargetData = As<'target-position'> & {
+export type TargetData = {
     compId?: number;
 };
 

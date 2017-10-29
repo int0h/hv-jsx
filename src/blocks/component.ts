@@ -1,5 +1,18 @@
 import {HyperValue, hvAuto} from 'hv';
-import {PropsAbstract, normalizeNode, HvNode, ContextMeta, TargetNode, TargetMock, TargetMeta, TargetData} from './common';
+
+import {
+    normalizeNode,
+
+    PropsAbstract,
+    HvNode,
+    ContextMeta,
+    TargetNode,
+    TargetMock,
+    TargetMeta,
+    TargetData,
+    AbstractElement
+} from './common';
+
 import {ZoneResult, HyperZone} from './zone';
 import {flatArray} from '../utils';
 
@@ -20,7 +33,7 @@ function injectId(id: number) {
     }
 }
 
-export abstract class Component<P extends PropsAbstract> {
+export abstract class Component<P extends PropsAbstract> implements AbstractElement {
     targetNode: TargetNode;
     hv: HyperValue<ZoneResult>;
     children: HvNode[];
@@ -40,7 +53,7 @@ export abstract class Component<P extends PropsAbstract> {
 
     init() {};
 
-    renderTarget(meta: ContextMeta): TargetNode {
+    targetRender(meta: ContextMeta): TargetNode {
         const t = meta.target;
         const domHv = hvAuto(() => this.render());
         const domZone = new HyperZone(domHv);
@@ -66,9 +79,9 @@ export type CustomComponent<P> = {
     new (props: PropsAbstract, children: (HvNode | string)[]): Component<P>;
 }
 
-export function closestComponent<T extends Component<any>>(meta: TargetMeta, target: TargetMock, node: TargetNode): T | null {
-    const found = target.closest(meta, node, node => {
-        const data = target.getData(meta, node);
+export function closestComponent<T extends Component<any>>(targetMeta: TargetMeta, target: TargetMock, node: TargetNode): T | null {
+    const found = target.closest(targetMeta, node, node => {
+        const data = target.getData(targetMeta, node);
         return data.compId !== undefined;
     });
 
@@ -76,6 +89,6 @@ export function closestComponent<T extends Component<any>>(meta: TargetMeta, tar
         return null;
     }
 
-    const id = target.getData(meta, found).compId;
+    const id = target.getData(targetMeta, found).compId;
     return componentTable[Number(id)] as T;
 }
