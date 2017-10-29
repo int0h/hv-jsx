@@ -66,14 +66,6 @@ export type CustomComponent<P> = {
     new (props: PropsAbstract, children: (HvNode | string)[]): Component<P>;
 }
 
-export function component<P>(
-    componentClass: CustomComponent<P>,
-    props: P,
-    ...children: (HvNode | string)[]
-) {
-    return new componentClass(props, children);
-}
-
 export function closestComponent<T extends Component<any>>(meta: TargetMeta, target: TargetMock, node: TargetNode): T | null {
     const found = target.closest(meta, node, node => {
         const data = target.getData(meta, node);

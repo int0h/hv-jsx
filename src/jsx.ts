@@ -1,6 +1,6 @@
 import {HvNode, Props, Ref} from './blocks/common';
 import {HyperElm} from './blocks/element';
-import {component, CustomComponent, Component} from './blocks/component';
+import {CustomComponent, Component} from './blocks/component';
 // import {HyperStyle} from './style';
 
 declare global {
@@ -31,7 +31,7 @@ export function jsx<P extends Props>(what: string | CustomComponent<P>, props: P
         return new HyperElm(what, props, children);
     }
 
-    return component(what, props, ...children);
+    return new what(props, children);
 }
 
 export type JsxFn = typeof jsx;
