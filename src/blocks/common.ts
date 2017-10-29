@@ -21,11 +21,15 @@ export type HvNode = AbstractElement;
 export type ChildNode = HvNode | string | number | HyperValue<HvNode | string | number>;
 
 export type TargetNode = {} & As<'target-node'>;
+
 export type TargetMeta = {} & As<'target-meta'>;
+
 export type TargetPosition = {} & As<'target-position'>;
+
 export type TargetData = As<'target-position'> & {
     compId?: number;
 };
+
 export type TargetMock = Target<TargetNode, TargetMeta, TargetPosition, TargetData>;
 
 export interface ContextMeta {
