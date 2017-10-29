@@ -1,9 +1,14 @@
 import {HyperValue} from 'hv';
-import {DomNode, XmlNamespace} from '../domHelpers';
 import {Dict} from '../utils';
 import {HyperElm} from './element';
-import {StringElm} from './literal';
+import {StringElm} from './string';
 import {HyperZone} from './zone';
+import {PlaceholderElm} from './placeholder';
+import {Target} from '../target';
+
+export declare class As<S extends string> {
+    private as: S;
+}
 
 export type Props = Dict<any>;
 
@@ -15,14 +20,23 @@ export type HvNode = AbstractElement;
 
 export type ChildNode = HvNode | string | number | HyperValue<HvNode | string | number>;
 
+export type TargetNode = {} & As<'target-node'>;
+export type TargetMeta = {} & As<'target-meta'>;
+export type TargetPosition = {} & As<'target-position'>;
+export type TargetData = As<'target-position'> & {
+    compId?: number;
+};
+export type TargetMock = Target<TargetNode, TargetMeta, TargetPosition, TargetData>;
+
 export interface ContextMeta {
     mapAttrs?: (attrs: PropsAbstract) => PropsAbstract;
-    ns: XmlNamespace;
+    targetMeta: TargetMeta;
+    target: TargetMock;
 }
 
 export interface AbstractElement {
-    getDom(): DomNode;
-    renderDom(meta: ContextMeta): DomNode;
+    targetNode: TargetNode;
+    targetRender(meta: ContextMeta): TargetNode;
 }
 
 export interface Ref {
@@ -31,8 +45,7 @@ export interface Ref {
 
 export function normalizeNode(child: ChildNode): HvNode {
     if (child === null) {
-        const scriptNode = new HyperElm('script', {}, []);
-        return scriptNode;
+        return new PlaceholderElm();
     }
     if (typeof child === 'string') {
         return new StringElm(child);
@@ -46,14 +59,6 @@ export function normalizeNode(child: ChildNode): HvNode {
     return child;
 }
 
-export function getDom(node: HvNode) {
-    return node.getDom();
-}
-
 export function render(node: HvNode, meta: ContextMeta) {
-    return node.renderDom(meta);
-}
-
-export function h(tagName: string, props: Dict<any>, ...children: (HvNode | string)[]): HyperElm {
-    return new HyperElm(tagName, props, children);
+    return node.targetRender(meta);
 }

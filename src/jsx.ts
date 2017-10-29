@@ -1,6 +1,7 @@
-import {h, HvNode, Props, Ref} from './blocks/common';
+import {HvNode, Props, Ref} from './blocks/common';
+import {HyperElm} from './blocks/element';
 import {component, CustomComponent, Component} from './blocks/component';
-import {HyperStyle} from './style';
+// import {HyperStyle} from './style';
 
 declare global {
     namespace JSX {
@@ -14,7 +15,7 @@ declare global {
         type IntrinsicElements = {
             [key: string]: {
                 [name: string]: any;
-                style?: HyperStyle;
+                // style?: HyperStyle;
                 ref?: Ref;
             };
         }
@@ -27,7 +28,7 @@ export function jsx<P extends Props>(what: string | CustomComponent<P>, props: P
     }
 
     if (typeof what === 'string') {
-        return h(what, props, ...children);
+        return new HyperElm(what, props, children);
     }
 
     return component(what, props, ...children);

@@ -1,5 +1,5 @@
 {
-    "name": "hv-dom",
+    "name": "hv-jsx",
     "version": "0.1.0",
     "description": "",
     "main": "./dist/index.js",

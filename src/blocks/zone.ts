@@ -1,26 +1,25 @@
 import {HyperValue, hvWrap} from 'hv';
-import {AbstractElement, normalizeNode, render, HvNode, ContextMeta} from './common';
-import {replaceDom, DomNode} from '../domHelpers';
+import {AbstractElement, normalizeNode, render, HvNode, ContextMeta, TargetNode} from './common';
 
 export type ZoneResult = HvNode | string | number;
 
 export class HyperZone implements AbstractElement {
     content: HyperValue<HvNode>;
-    dom: DomNode;
+    targetNode: TargetNode;
 
     constructor (content: HyperValue<ZoneResult>) {
         this.content = hvWrap(content, normalizeNode);
     }
 
-    renderDom(meta: ContextMeta): DomNode {
-        this.content.watch((newElm, oldElm) => {
-            replaceDom(render(newElm, meta), oldElm.getDom());
-        })
-        this.dom = render(this.content.g(), meta);
-        return this.dom;
-    }
+    targetRender(meta: ContextMeta): TargetNode {
+        const t = meta.target;
 
-    getDom(): DomNode {
-        return this.dom;
+        this.content.watch((newElm, oldElm) => {
+            const newContent = render(newElm, meta);
+            t.replace(meta.targetMeta, oldElm.targetNode, newContent);
+        })
+
+        this.targetNode = render(this.content.g(), meta);
+        return this.targetNode;
     }
 }

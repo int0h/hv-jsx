@@ -1,9 +1,7 @@
 import {HyperValue, hvAuto} from 'hv';
-import {PropsAbstract, normalizeNode, HvNode, ContextMeta} from './common';
+import {PropsAbstract, normalizeNode, HvNode, ContextMeta, TargetNode, TargetMock, TargetMeta, TargetData} from './common';
 import {ZoneResult, HyperZone} from './zone';
-import {DomNode, setAttr} from '../domHelpers';
 import {flatArray} from '../utils';
-import {DomEventEmitter, DomEventHandler} from '../events';
 
 export let componentTable: Component<any>[] = [];
 
@@ -23,12 +21,12 @@ function injectId(id: number) {
 }
 
 export abstract class Component<P extends PropsAbstract> {
-    dom: DomNode;
+    targetNode: TargetNode;
     hv: HyperValue<ZoneResult>;
     children: HvNode[];
     props: P;
     id: number;
-    domEe: DomEventEmitter;
+    // domEe: DomEventEmitter;
 
     constructor (props: P, children: (HvNode | string)[]) {
         children = flatArray(children);
@@ -36,41 +34,32 @@ export abstract class Component<P extends PropsAbstract> {
         this.props = props;
         this.id = componentTable.length;
         componentTable.push(this);
-        this.domEe = new DomEventEmitter();
+        // this.domEe = new DomEventEmitter();
         this.init();
     }
 
     init() {};
 
-    renderDom(meta: ContextMeta): DomNode {
+    renderTarget(meta: ContextMeta): TargetNode {
+        const t = meta.target;
         const domHv = hvAuto(() => this.render());
         const domZone = new HyperZone(domHv);
-        this.dom = domZone.renderDom({
-            ns: meta.ns,
+        this.targetNode = domZone.targetRender({
+            ...meta,
             mapAttrs: injectId(this.id)
         });
-        setAttr(this.dom as Element, 'data-hv-comp-id', this.id, meta.ns);
-        return this.dom;
+        t.setData(meta.targetMeta, this.targetNode, {
+            compId: this.id
+        } as TargetData);
+        return this.targetNode;
     }
 
-    getDom(): DomNode {
-        return this.dom;
-    }
+    // on(eventType: string, targetId: string, handler: DomEventHandler) {
+    //     this.domEe.listen(eventType, targetId, handler);
 
-    on(eventType: string, targetId: string, handler: DomEventHandler) {
-        this.domEe.listen(eventType, targetId, handler);
-
-    }
+    // }
 
     abstract render(): HvNode;
-
-    // private static getId() {
-    //     if (this.id) {
-    //         return this.id;
-    //     }
-    //     this.id = componentClassTable.length;
-    //     componentClassTable.push(this);
-    // }
 }
 
 export type CustomComponent<P> = {
@@ -85,16 +74,16 @@ export function component<P>(
     return new componentClass(props, children);
 }
 
-export function closestComponent<T extends Component<any>>(dom: DomNode): T | null {
-    let elem = (dom as HTMLElement | null);
-    while (true) {
-        if (!elem) {
-            return null;
-        }
-        const id = elem.dataset && elem.dataset.hvCompId;
-        if (id !== undefined) {
-            return componentTable[Number(id)] as T;
-        }
-        elem = elem.parentElement;
+export function closestComponent<T extends Component<any>>(meta: TargetMeta, target: TargetMock, node: TargetNode): T | null {
+    const found = target.closest(meta, node, node => {
+        const data = target.getData(meta, node);
+        return data.compId !== undefined;
+    });
+
+    if (!found) {
+        return null;
     }
+
+    const id = target.getData(meta, found).compId;
+    return componentTable[Number(id)] as T;
 }
