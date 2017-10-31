@@ -16,11 +16,14 @@
             "es5",
             "es2015.promise"
         ],
-        "noUnusedLocals": true
+        "noUnusedLocals": true,
+        "jsx": "react",
+        "jsxFactory": "jsx"
     },
     "include": [
         "./src/index.ts",
         "./src/tests/**/*.ts",
+        "./src/tests/**/*.tsx",
         "./src/temp/*.ts"
     ]
 }
