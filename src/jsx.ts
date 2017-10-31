@@ -18,7 +18,7 @@ declare global {
                 // style?: HyperStyle;
                 ref?: Ref;
             };
-        }
+        };
     }
 }
 

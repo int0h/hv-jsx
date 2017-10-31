@@ -10,14 +10,6 @@ export function flatArray(arr: any[]): any[] {
     return res;
 }
 
-export function getAllParents(elm: HTMLElement): HTMLElement[] {
-    const parent = elm.parentElement;
-    if (!parent) {
-        return [];
-    }
-    return [parent, ...getAllParents(parent)];
-}
-
 export interface Dict<T> {
     [key: string]: T;
 }
