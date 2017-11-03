@@ -17,7 +17,7 @@ export class HyperZone implements AbstractElement {
         this.content.watch((newElm, oldElm) => {
             const newContent = render(newElm, meta);
             t.replace(meta.targetMeta, oldElm.targetNode, newContent);
-        })
+        });
 
         this.targetNode = render(this.content.g(), meta);
         return this.targetNode;

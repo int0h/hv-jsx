@@ -18,10 +18,10 @@ import {flatArray} from '../utils';
 
 interface RefProps {
     [name: string]: (value: any, target: HyperElm) => void;
-};
+}
 
 const refProps: RefProps = {
-}
+};
 
 export class HyperElm implements AbstractElement {
     tagName: string;
