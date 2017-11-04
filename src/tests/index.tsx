@@ -149,4 +149,93 @@ test('basic content data binding', t => {
         t.end();
     });
 
+    t.test('hv jsx multi content', t => {
+        let c1 = new HyperValue(<b>hello</b>);
+        let c2 = new HyperValue(<i>world</i>);
+        const res = renderDom(<div>{c1}{c2}</div>) as Elem;
+        t.is((res.children[0] as Elem).type, 'b', 'content rendered');
+        t.is((res.children[1] as Elem).type, 'i', 'content rendered');
+        c1.s(<a>whats up</a>);
+        t.is((res.children[0] as Elem).type, 'a', 'content rendered');
+        t.is((res.children[1] as Elem).type, 'i', 'content rendered');
+        c2.s(<w>dude</w>);
+        t.is((res.children[0] as Elem).type, 'a', 'content rendered');
+        t.is((res.children[1] as Elem).type, 'w', 'content rendered');
+        t.end();
+    });
+
+});
+
+test('basic components', t => {
+
+    t.test('hv text content', t => {
+        class Comp extends Component<{}> {
+            render() {
+                return <hello />;
+            }
+        }
+
+        const res = renderDom(<Comp />) as Elem;
+        t.is(res.type, 'hello', 'component rendered');
+        t.end();
+    });
+
+    t.test('hv text content', t => {
+        class Comp extends Component<{}> {
+            render() {
+                return <h>{this.children}</h>;
+            }
+        }
+
+        const res = renderDom(<Comp><foo /></Comp>) as Elem;
+        t.is(res.type, 'h', 'component rendered');
+        t.is((res.children[0] as Elem).type, 'foo', 'component rendered');
+        t.end();
+    });
+
+    t.test('hv multi text content', t => {
+        class Comp extends Component<{}> {
+            render() {
+                return <h>{this.children}</h>;
+            }
+        }
+
+        const res = renderDom(<Comp><foo /><boo /></Comp>) as Elem;
+        t.is(res.type, 'h', 'component rendered');
+        t.is((res.children[0] as Elem).type, 'foo', 'component rendered');
+        t.is((res.children[1] as Elem).type, 'boo', 'component rendered');
+        t.end();
+    });
+
+});
+
+
+test('hyper zone', t => {
+
+    t.test('basic render', t => {
+        const zone = new HyperValue(<a>asd</a>);
+        const res = renderDom(<div>{zone}</div>) as Elem;
+        t.is((res.children[0] as Elem).type, 'a', 'content is rendered');
+        t.end();
+    });
+
+    t.test('update', t => {
+        const zone = new HyperValue(<a>asd</a>);
+        const res = renderDom(<div>{zone}</div>) as Elem;
+        t.is((res.children[0] as Elem).type, 'a', 'content is rendered');
+        zone.s(<b>asd</b>);
+        t.is((res.children[0] as Elem).type, 'b', 'content is updated');
+        t.end();
+    });
+
+    t.test('multi root', t => {
+        const zone = new HyperValue([<a/>, <b />]);
+        const res = renderDom(<div>{zone}</div>) as Elem;
+        t.is((res.children[0] as Elem).type, 'a', 'content is rendered');
+        t.is((res.children[1] as Elem).type, 'b', 'content is updated');
+        t.end();
+    });
+
+
+
 });
