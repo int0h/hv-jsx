@@ -1,4 +1,4 @@
-import {HvNode, Props, Ref} from './blocks/common';
+import {HvNode, Props, Ref} from './blocks/abstract';
 import {HyperElm} from './blocks/element';
 import {CustomComponent, Component} from './blocks/component';
 // import {HyperStyle} from './style';

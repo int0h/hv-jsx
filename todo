@@ -1,5 +1,7 @@
 - support function components
-- support array as ZoneResult
++ support array as ZoneResult
 - make better typings for jsx children
 - consider ContextMeta, mapAttrs etc.
 - test coverage
+- make Component constructor arguments optional
+- ref tests

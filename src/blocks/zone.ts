@@ -1,25 +1,35 @@
 import {HyperValue, hvWrap} from 'hv';
-import {AbstractElement, normalizeNode, render, HvNode, ContextMeta, TargetNode} from './common';
+import {normalizeNodeSet} from './common';
+import {AbstractElement, HvNode, ContextMeta, TargetNode, Children} from './abstract';
+import {flatArray} from '../utils';
 
-export type ZoneResult = HvNode | string | number;
+export class HyperZone extends AbstractElement {
+    content: HyperValue<HvNode[]>;
+    targetNodes: TargetNode[];
 
-export class HyperZone implements AbstractElement {
-    content: HyperValue<HvNode>;
-    targetNode: TargetNode;
-
-    constructor (content: HyperValue<ZoneResult>) {
-        this.content = hvWrap(content, normalizeNode);
+    constructor (content: HyperValue<Children>) {
+        super();
+        this.content = hvWrap(content, normalizeNodeSet);
     }
 
-    targetRender(meta: ContextMeta): TargetNode {
+    private getTargetNodes(meta: ContextMeta, elems: HvNode[], needRender: boolean): TargetNode[] {
+        return flatArray<TargetNode>(elems.map(elem => {
+            return needRender
+                ? elem.targetRender(meta)
+                : elem.targetNodes;
+        }));
+    }
+
+    targetRender(meta: ContextMeta): TargetNode[] {
         const t = meta.target;
 
-        this.content.watch((newElm, oldElm) => {
-            const newContent = render(newElm, meta);
-            t.replace(meta.targetMeta, oldElm.targetNode, newContent);
+        this.content.watch((newElems, oldElems) => {
+            const newContent = this.getTargetNodes(meta, newElems, true);
+            const oldContent = this.getTargetNodes(meta, oldElems, false);
+            t.replaceSequence(meta.targetMeta, oldContent, newContent);
         });
 
-        this.targetNode = render(this.content.g(), meta);
-        return this.targetNode;
+        this.targetNodes = this.getTargetNodes(meta, this.content.g(), true);
+        return this.targetNodes;
     }
 }

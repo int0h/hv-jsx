@@ -1,8 +1,7 @@
 import {HyperValue} from 'hv';
 
 import {
-    normalizeNode,
-    render
+    normalizeNodeSet
 } from './common';
 
 import {
@@ -10,11 +9,10 @@ import {
     ContextMeta,
     PropsAbstract,
     Ref,
-    ChildNode,
+    HvNode,
+    Children,
     TargetNode
-} from './common';
-
-import {flatArray} from '../utils';
+} from './abstract';
 
 interface RefProps {
     [name: string]: (value: any, target: HyperElm) => void;
@@ -23,17 +21,19 @@ interface RefProps {
 const refProps: RefProps = {
 };
 
-export class HyperElm implements AbstractElement {
+export class HyperElm extends AbstractElement {
+    targetNode: TargetNode;
+    targetNodes: TargetNode[];
     tagName: string;
     props: PropsAbstract;
-    children: ChildNode[];
+    children: HvNode[];
     ref: Ref;
-    targetNode: TargetNode;
 
-    constructor (tagName: string, props: PropsAbstract, children: ChildNode[]) {
+    constructor (tagName: string, props: PropsAbstract, children: Children) {
+        super();
         this.tagName = tagName;
         this.props = props || {};
-        this.children = children;
+        this.children = normalizeNodeSet(children);
     }
 
     private setAttrs(meta: ContextMeta) {
@@ -64,10 +64,11 @@ export class HyperElm implements AbstractElement {
 
     private setChildren(meta: ContextMeta, nestedMeta: ContextMeta) {
         const t = meta.target;
-        this.children = flatArray(this.children);
         for (let child of this.children) {
-            const elem = render(normalizeNode(child), nestedMeta);
-            t.append(meta.targetMeta, nestedMeta.targetMeta, this.targetNode, elem);
+            const elems = child.targetRender(meta);
+            for (let elem of elems) {
+                t.append(meta.targetMeta, nestedMeta.targetMeta, this.targetNode, elem);
+            }
         }
     }
 
@@ -80,14 +81,13 @@ export class HyperElm implements AbstractElement {
         }
     }
 
-    targetRender(meta: ContextMeta): TargetNode {
+    targetRender(meta: ContextMeta): TargetNode[] {
         const t = meta.target;
         const [elem, nestedTargetMeta] = t.create(meta.targetMeta, this.tagName);
         const nestedMeta = {
             ...meta,
             targetMeta: nestedTargetMeta
         };
-
         this.targetNode = elem;
         this.setAttrs(meta);
         this.setChildren(meta, nestedMeta);
@@ -95,6 +95,7 @@ export class HyperElm implements AbstractElement {
         if (this.ref) {
             this.ref(this);
         }
-        return this.targetNode;
+        this.targetNodes = [this.targetNode];
+        return this.targetNodes;
     }
 }

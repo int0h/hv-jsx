@@ -1,4 +1,6 @@
-export function flatArray(arr: any[]): any[] {
+export interface NestedArray<T> extends Array<T | NestedArray<T>> {}
+
+export function flatArray<T>(arr: NestedArray<T>): T[] {
     let res: any[] = [];
     arr.forEach(item => {
         if (!Array.isArray(item)) {

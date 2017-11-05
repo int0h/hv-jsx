@@ -1,16 +1,17 @@
-import {AbstractElement, ContextMeta, TargetNode} from './common';
+import {AbstractElement, ContextMeta, TargetNode} from './abstract';
 
-export class StringElm implements AbstractElement {
+export class StringElm extends AbstractElement {
     text: string;
-    targetNode: TargetNode;
+    targetNodes: TargetNode[];
 
     constructor (text: string) {
+        super();
         this.text = text;
     }
 
-    targetRender(meta: ContextMeta): TargetNode {
+    targetRender(meta: ContextMeta): TargetNode[] {
         const t = meta.target;
-        this.targetNode = t.createTextNode(meta.targetMeta, this.text);
-        return this.targetNode;
+        this.targetNodes = [t.createTextNode(meta.targetMeta, this.text)];
+        return this.targetNodes;
     }
 }

@@ -1,22 +1,24 @@
 import {HyperValue, hvAuto} from 'hv';
 
 import {
-    normalizeNode,
+    normalizeNodeSet,
+} from './common';
 
+import {
     PropsAbstract,
     HvNode,
     ContextMeta,
     TargetNode,
     TargetMock,
     TargetMeta,
-    TargetData,
-    AbstractElement
-} from './common';
+    AbstractElement,
+    Children
+} from './abstract';
 
-import {ZoneResult, HyperZone} from './zone';
-import {flatArray} from '../utils';
+import {HyperZone} from './zone';
 
 export let componentTable: Component<any>[] = [];
+
 
 function injectId(id: number) {
     return (attrs: PropsAbstract) => {
@@ -30,20 +32,20 @@ function injectId(id: number) {
         // todo consider me
         // delete newAttrs.id;
         return newAttrs;
-    }
+    };
 }
 
-export abstract class Component<P extends PropsAbstract> implements AbstractElement {
-    targetNode: TargetNode;
-    hv: HyperValue<ZoneResult>;
+export abstract class Component<P extends PropsAbstract> extends AbstractElement {
+    targetNodes: TargetNode[];
+    hv: HyperValue<Children>;
     children: HvNode[];
     props: P;
     id: number;
     // domEe: DomEventEmitter;
 
-    constructor (props: P, children: (HvNode | string)[]) {
-        children = flatArray(children);
-        this.children = children.map(child => normalizeNode(child));
+    constructor (props: P, children: Children) {
+        super();
+        this.children = normalizeNodeSet(children);
         this.props = props;
         this.id = componentTable.length;
         componentTable.push(this);
@@ -51,20 +53,22 @@ export abstract class Component<P extends PropsAbstract> implements AbstractElem
         this.init();
     }
 
-    init() {};
+    init() {}
 
-    targetRender(meta: ContextMeta): TargetNode {
+    targetRender(meta: ContextMeta): TargetNode[] {
         const t = meta.target;
         const domHv = hvAuto(() => this.render());
         const domZone = new HyperZone(domHv);
-        this.targetNode = domZone.targetRender({
+        this.targetNodes = domZone.targetRender({
             ...meta,
             mapAttrs: injectId(this.id)
         });
-        t.setData(meta.targetMeta, this.targetNode, {
-            compId: this.id
-        } as TargetData);
-        return this.targetNode;
+        for (let elem of this.targetNodes) {
+            t.setData(meta.targetMeta, elem, {
+                compId: this.id
+            });
+        }
+        return this.targetNodes;
     }
 
     // on(eventType: string, targetId: string, handler: DomEventHandler) {
@@ -72,12 +76,12 @@ export abstract class Component<P extends PropsAbstract> implements AbstractElem
 
     // }
 
-    abstract render(): HvNode;
+    abstract render(): Children;
 }
 
 export type CustomComponent<P> = {
     new (props: PropsAbstract, children: (HvNode | string)[]): Component<P>;
-}
+};
 
 export function closestComponent<T extends Component<any>>(targetMeta: TargetMeta, target: TargetMock, node: TargetNode): T | null {
     const found = target.closest(targetMeta, node, node => {

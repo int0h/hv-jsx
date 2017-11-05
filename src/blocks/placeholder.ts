@@ -1,11 +1,11 @@
-import {AbstractElement, ContextMeta, TargetNode} from './common';
+import {AbstractElement, ContextMeta, TargetNode} from './abstract';
 
-export class PlaceholderElm implements AbstractElement {
-    targetNode: TargetNode;
+export class PlaceholderElm extends AbstractElement {
+    targetNodes: TargetNode[];
 
-    targetRender(meta: ContextMeta): TargetNode {
+    targetRender(meta: ContextMeta): TargetNode[] {
         const t = meta.target;
-        this.targetNode = t.createPlaceholder(meta.targetMeta);
-        return this.targetNode;
+        this.targetNodes = [t.createPlaceholder(meta.targetMeta)];
+        return this.targetNodes;
     }
 }

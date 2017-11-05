@@ -3,5 +3,7 @@
     "editor.insertSpaces": true,
     "workbench.colorTheme": "Monokai",
     "editor.fontSize": 12,
-    "editor.renderWhitespace": "boundary"
+    "editor.renderWhitespace": "boundary",
+    "gitlens.codeLens.enabled": false,
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
