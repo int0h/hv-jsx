@@ -7,10 +7,7 @@ import {HyperZone} from './zone';
 import {PlaceholderElm} from './placeholder';
 
 export function normalizeNodeSet(children: Children): HvNode[] {
-    if (children === null) {
-        return [new PlaceholderElm()];
-    }
-    if (children === false) {
+    if (!children) {
         return [new PlaceholderElm()];
     }
     if (typeof children === 'string') {
