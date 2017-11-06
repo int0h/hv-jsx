@@ -2,6 +2,7 @@ import test = require('tape');
 
 import {HyperValue} from 'hv';
 import {jsx, Component, HvNode} from '..';
+import {isComponentClass} from '../blocks/component';
 import {renderDom, Elem, TextNode, Placeholder} from 'hv-jsx-mock';
 
 test('jsx works', t => {
@@ -204,6 +205,54 @@ test('basic components', t => {
         t.is(res.type, 'h', 'component rendered');
         t.is((res.children[0] as Elem).type, 'foo', 'component rendered');
         t.is((res.children[1] as Elem).type, 'boo', 'component rendered');
+        t.end();
+    });
+
+    t.test('multi root', t => {
+        class Comp extends Component<{}> {
+            render() {
+                return [<a/>, <b/>];
+            }
+        }
+
+        const res = renderDom(<Comp/>);
+        t.is((res[0] as Elem).type, 'a', 'component rendered');
+        t.is((res[1] as Elem).type, 'b', 'component rendered');
+        t.end();
+    });
+
+    t.test('multi root update', t => {
+        let a = new HyperValue('a');
+        let b = new HyperValue('b');
+
+        class Comp extends Component<{a: HyperValue<string>, b: HyperValue<string>}> {
+            render() {
+                const {a, b} = this.props;
+                return [<a p={a}/>, <b p={b}/>];
+            }
+        }
+
+        const res = renderDom(<Comp a={a} b={b}/>);
+        t.is((res[0] as Elem).type, 'a', 'component rendered');
+        t.is((res[0] as Elem).props.p, 'a', 'property rendered');
+        t.is((res[1] as Elem).type, 'b', 'component rendered');
+        t.is((res[1] as Elem).props.p, 'b', 'property rendered');
+        a.s('aa');
+        b.s('bb');
+        t.is((res[0] as Elem).props.p, 'aa', 'property rendered');
+        t.is((res[1] as Elem).props.p, 'bb', 'property rendered');
+        t.end();
+    });
+
+    t.test('detect component class', t => {
+        class Comp extends Component<{}> {
+            render() {
+                return <hello />;
+            }
+        }
+
+        t.true(isComponentClass(Comp), 'component detected');
+        t.false(isComponentClass((() => {}) as any), 'functions are not component classes');
         t.end();
     });
 

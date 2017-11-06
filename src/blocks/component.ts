@@ -36,6 +36,8 @@ function injectId(id: number) {
 }
 
 export abstract class Component<P extends PropsAbstract> extends AbstractElement {
+    static hvComponent = true;
+
     targetNodes: TargetNode[];
     hv: HyperValue<Children>;
     children: HvNode[];
@@ -82,6 +84,10 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
 export type CustomComponent<P> = {
     new (props: PropsAbstract, children: (HvNode | string)[]): Component<P>;
 };
+
+export function isComponentClass(fn: CustomComponent<any>): boolean {
+    return (fn as any).hvComponent === true;
+}
 
 export function closestComponent<T extends Component<any>>(targetMeta: TargetMeta, target: TargetMock, node: TargetNode): T | null {
     const found = target.closest(targetMeta, node, node => {

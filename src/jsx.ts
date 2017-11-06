@@ -1,4 +1,4 @@
-import {HvNode, Props, Ref} from './blocks/abstract';
+import {HvNode, Props, Ref, Children} from './blocks/abstract';
 import {HyperElm} from './blocks/element';
 import {CustomComponent, Component} from './blocks/component';
 // import {HyperStyle} from './style';
@@ -7,7 +7,7 @@ declare global {
     namespace JSX {
         type Element<P> = HvNode;
         interface ElementClass<P> {
-            render: () => HvNode;
+            render: () => Children;
         }
         interface ElementAttributesProperty {
             props: any;
