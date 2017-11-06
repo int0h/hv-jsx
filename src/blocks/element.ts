@@ -83,14 +83,18 @@ export class HyperElm extends AbstractElement {
 
     targetRender(meta: ContextMeta): TargetNode[] {
         const t = meta.target;
-        const [elem, nestedTargetMeta] = t.create(meta.targetMeta, this.tagName);
+        const [elem, selfTargetMeta, nestedTargetMeta] = t.create(meta.targetMeta, this.tagName);
         const nestedMeta = {
             ...meta,
             targetMeta: nestedTargetMeta
         };
+        const selfMeta = {
+            ...meta,
+            targetMeta: selfTargetMeta
+        };
         this.targetNode = elem;
-        this.setAttrs(meta);
-        this.setChildren(meta, nestedMeta);
+        this.setAttrs(selfMeta);
+        this.setChildren(selfMeta, nestedMeta);
         this.handleRefProps();
         if (this.ref) {
             this.ref(this);

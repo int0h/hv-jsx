@@ -12,13 +12,13 @@ declare global {
         interface ElementAttributesProperty {
             props: any;
         }
-        type IntrinsicElements = {
+        interface IntrinsicElements {
             [key: string]: {
                 [name: string]: any;
                 // style?: HyperStyle;
                 ref?: Ref;
             };
-        };
+        }
     }
 }
 

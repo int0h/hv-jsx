@@ -1,5 +1,5 @@
 export interface Target<T, M, P, D> {
-    create: (meta: M, type: string) => [T, M];
+    create: (meta: M, type: string) => [T, M, M];
     append: (meta: M, parentMeta: M, parent: T, child: T) => void;
     // insert: (meta: M, parent: T, child: T, position?: P) => void;
     // remove: (meta: M, elem: T) => void;

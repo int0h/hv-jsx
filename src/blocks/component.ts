@@ -1,10 +1,6 @@
 import {HyperValue, hvAuto} from 'hv';
 
 import {
-    normalizeNodeSet,
-} from './common';
-
-import {
     PropsAbstract,
     HvNode,
     ContextMeta,
@@ -14,6 +10,10 @@ import {
     AbstractElement,
     Children
 } from './abstract';
+
+import {
+    normalizeNodeSet,
+} from './common';
 
 import {HyperZone} from './zone';
 

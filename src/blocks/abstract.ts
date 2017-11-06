@@ -21,7 +21,7 @@ export type HvNodeSet = HvNode | HvNode[];
 
 // child types:
 
-export type ChildNodePrimitive = HvNode | string | number;
+export type ChildNodePrimitive = HvNode | string | number | false;
 
 export interface ChildHvNode extends HyperValue<ChildHvNode | ChildNodePrimitive> {}
 

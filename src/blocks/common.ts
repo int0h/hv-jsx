@@ -10,6 +10,9 @@ export function normalizeNodeSet(children: Children): HvNode[] {
     if (children === null) {
         return [new PlaceholderElm()];
     }
+    if (children === false) {
+        return [new PlaceholderElm()];
+    }
     if (typeof children === 'string') {
         return [new StringElm(children)];
     }
