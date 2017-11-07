@@ -19,6 +19,9 @@ import {HyperZone} from './zone';
 
 export let componentTable: Component<any>[] = [];
 
+export interface FunctionComponent<P extends PropsAbstract> {
+    (props: P, children: Children): Children;
+}
 
 function injectId(id: number) {
     return (attrs: PropsAbstract) => {

@@ -58,6 +58,21 @@ test('basic rendering', t => {
         t.end();
     });
 
+    t.test('empty string as a child', t => {
+        const res = renderDom(<div>{''}</div>)[0] as Elem;
+        const s = res.children[0] as TextNode;
+        t.true(s instanceof TextNode, 'content rendering');
+        t.is(s.text, '', 'content rendering');
+        t.end();
+    });
+
+    t.test('empty string as jsx', t => {
+        const res = renderDom('')[0] as TextNode;
+        t.true(res instanceof TextNode, 'content rendering');
+        t.is(res.text, '', 'content rendering');
+        t.end();
+    });
+
 });
 
 test('basic attriutes data binding', t => {
@@ -259,9 +274,47 @@ test('basic components', t => {
     t.test('function as component', t => {
         const Comp = () => '';
 
+        const res = renderDom(<Comp />)[0] as TextNode;
+        t.true(res instanceof TextNode, 'rendered');
+        t.end();
+    });
+
+    t.test('function as component: jsx', t => {
+        const Comp = () => <a/>;
+
         const res = renderDom(<Comp />)[0] as Elem;
-        t.true(isComponentClass(Comp), 'component detected');
-        t.false(isComponentClass((() => {}) as any), 'functions are not component classes');
+        t.true(res instanceof Elem, 'rendered');
+        t.end();
+    });
+
+    t.test('function as component: props', t => {
+        const Comp = ({v}: {v: string}) => <a href={v}/>;
+
+        const res = renderDom(<Comp v='foo' />)[0] as Elem;
+        t.is(res.props.href, 'foo', 'rendered');
+        t.end();
+    });
+
+    t.test('function as component: children', t => {
+        const Comp = ({}, children: Children) => <a>
+            {children}
+        </a>;
+
+        const res = renderDom(<Comp><hello/></Comp>)[0] as Elem;
+        const child = res.children[0] as Elem;
+        t.is(child.type, 'hello', 'rendered');
+        t.end();
+    });
+
+    t.test('function as component: update', t => {
+        const hv = new HyperValue('hey');
+
+        const Comp = () => <a>{hv}</a>;
+
+        const res = renderDom(<Comp />)[0] as Elem;
+        t.is((res.children[0] as TextNode).text, 'hey', 'rendered');
+        hv.s('wassup');
+        t.is((res.children[0] as TextNode).text, 'wassup', 'rendered');
         t.end();
     });
 
