@@ -1,5 +1,5 @@
 import {HyperValue} from 'hv';
-import {Dict} from '../utils';
+import {Dict, NestedArray} from '../utils';
 import {Target} from '../target';
 
 export abstract class AbstractElement {
@@ -21,15 +21,19 @@ export type HvNodeSet = HvNode | HvNode[];
 
 // child types:
 
-export type ChildNodePrimitive = HvNode | string | number | false | undefined | null;
+export type ChildNodePrimitive = HvNode | string | number | boolean | undefined | null;
 
 export interface ChildHvNode extends HyperValue<ChildHvNode | ChildNodePrimitive> {}
 
 export type ChildNode = ChildNodePrimitive | ChildHvNode;
 
-export interface ChildNodeArray extends Array<ChildNode> {}
+export interface ChildNodeArray extends NestedArray<ChildNode> {}
 
-export type Children = ChildNode | ChildNodeArray | HyperValue<ChildNodeArray>;
+export interface NestedHv<T> extends HyperValue<T | NestedHv<T>> {}
+
+export type Children = ChildNode
+    | HyperValue<ChildNode | NestedArray<ChildNode>>
+    | NestedArray<HyperValue<ChildNode | NestedArray<ChildNode>> | ChildNode | NestedArray<ChildNode>>;
 
 // target types:
 

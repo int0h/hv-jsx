@@ -1,6 +1,6 @@
 
 import {HyperValue, hvWrap} from 'hv';
-import {AbstractElement, HvNode, Children} from './abstract';
+import {AbstractElement, HvNode, Children, TargetNode, ContextMeta} from './abstract';
 import {flatArray} from '../utils';
 import {StringElm} from './string';
 import {HyperZone} from './zone';
@@ -30,4 +30,12 @@ export function normalizeNodeSet(children: Children): HvNode[] {
         return [new HyperZone(content)];
     }
     throw new Error('invalid child');
+}
+
+export function targetRenderChildren(meta: ContextMeta, children: Children): TargetNode[] {
+    return flatArray(
+        normalizeNodeSet(children)
+            .map(node => node.targetRender(meta)
+        )
+    );
 }

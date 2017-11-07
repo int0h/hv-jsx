@@ -1,7 +1,7 @@
 import test = require('tape');
 
 import {HyperValue} from 'hv';
-import {jsx, Component, HvNode} from '..';
+import {jsx, Component, Children} from '..';
 import {isComponentClass} from '../blocks/component';
 import {renderDom, Elem, TextNode, Placeholder} from 'hv-jsx-mock';
 
@@ -122,7 +122,7 @@ test('basic content data binding', t => {
     });
 
     t.test('hv jsx content: dynamic type', t => {
-        let val = new HyperValue<string | HvNode>(<b>hello</b>);
+        let val = new HyperValue<string | Children>(<b>hello</b>);
         const res = renderDom(<div>{val}</div>)[0] as Elem;
         const elem = res.children[0] as Elem;
         t.is(elem.type, 'b', 'content rendered');
@@ -132,7 +132,7 @@ test('basic content data binding', t => {
     });
 
     t.test('hv jsx content: nullable', t => {
-        let val = new HyperValue<null | HvNode>(<b>hello</b>);
+        let val = new HyperValue<null | Children>(<b>hello</b>);
         const res = renderDom(<div>{val}</div>)[0] as Elem;
         const elem = res.children[0] as Elem;
         t.is(elem.type, 'b', 'content rendered');
@@ -142,7 +142,7 @@ test('basic content data binding', t => {
     });
 
     t.test('hv jsx content: nullable and back', t => {
-        let val = new HyperValue<null | HvNode>(null);
+        let val = new HyperValue<null | Children>(null);
         const res = renderDom(<div>{val}</div>)[0] as Elem;
         t.true(res.children[0] instanceof Placeholder, 'content rendered');
         val.s(<b>hello</b>);
@@ -211,7 +211,7 @@ test('basic components', t => {
     t.test('multi root', t => {
         class Comp extends Component<{}> {
             render() {
-                return [<a/>, <b/>];
+                return [<a/>, <b/>] ;
             }
         }
 
@@ -251,6 +251,15 @@ test('basic components', t => {
             }
         }
 
+        t.true(isComponentClass(Comp), 'component detected');
+        t.false(isComponentClass((() => {}) as any), 'functions are not component classes');
+        t.end();
+    });
+
+    t.test('function as component', t => {
+        const Comp = () => '';
+
+        const res = renderDom(<Comp />)[0] as Elem;
         t.true(isComponentClass(Comp), 'component detected');
         t.false(isComponentClass((() => {}) as any), 'functions are not component classes');
         t.end();
