@@ -44,9 +44,6 @@ export function jsx<P extends Props>(what: string | CustomComponent<P> | Functio
             return fc(this.props, this.children);
         }
     }, props, ...children);
-
-    // const fc = what as FunctionComponent<P>;
-    // return new HyperZone(hvAuto(() => fc(props, children)));
 }
 
 export type JsxFn = typeof jsx;
