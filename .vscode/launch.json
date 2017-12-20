@@ -11,7 +11,7 @@
             "name": "Launch Program",
             "program": "${file}",
             "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
+                "${workspaceFolder}/tests/dist/**/*.js"
             ]
         }
     ]

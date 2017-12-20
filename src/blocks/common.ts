@@ -35,7 +35,9 @@ export function normalizeNodeSet(hs: scopes.ProxyScope, children: Children): HvN
     throw new Error('invalid child');
 }
 
-export function targetRenderChildren(hs: scopes.ProxyScope, meta: ContextMeta, children: Children): TargetNode[] {
+export function targetRenderChildren(meta: ContextMeta, children: Children): TargetNode[] {
+    const hs = new scopes.ProxyScope();
+
     return flatArray(
         normalizeNodeSet(hs, children)
             .map(node => node.targetRender(meta)

@@ -27,7 +27,7 @@ export class HyperElm extends AbstractElement {
     props: PropsAbstract;
     children: HvNode[];
     ref: Ref;
-    hs = new scopes.FullScope();
+    private hs = new scopes.FullScope();
 
     constructor (tagName: string, props: PropsAbstract, children: Children) {
         super();

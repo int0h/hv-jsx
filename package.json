@@ -20,7 +20,7 @@
   "keywords": [],
   "typings": "./types/",
   "scripts": {
-    "test": "node_modules/.bin/nyc ./node_modules/.bin/tape ./dist/tests/**/*.js | ./node_modules/.bin/tap-spec"
+    "test": "tsc -p ./tests/tsconfig.json && node_modules/.bin/nyc ./node_modules/.bin/tape ./tests/dist/*.js | ./node_modules/.bin/tap-spec"
   },
   "dependencies": {}
 }

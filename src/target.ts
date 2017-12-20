@@ -5,7 +5,7 @@ export interface Target<T, M, P, D> {
     // remove: (meta: M, elem: T) => void;
     setProp: (meta: M, elem: T, propPath: string, value: any) => void;
     // listen: (meta: M, elem: T, eventType: string, handler: Function) => void;
-    // getPosition: (meta: M, elem: T) => P;
+    getPosition?: (meta: M, elem: T) => P;
     replace: (meta: M, oldElem: T, newElem: T) => void;
     replaceSequence: (meta: M, oldElems: T[], newElem: T[]) => void;
     createTextNode: (meta: M, text: string) => T;

@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "inlineSourceMap": true,
+        "typeRoots": [
+            "./node_modules/@types"
+        ],
+        "outDir": "./dist",
+        "lib": [
+            "es2017"
+        ],
+        "noUnusedLocals": true,
+        "jsx": "react",
+        "jsxFactory": "jsx",
+        "baseUrl": "../..",
+        "paths": {
+            "hv/scopes/*": ["hv/types/scopes/*"]
+        }
+    },
+    "include": [
+        "./src/index.tsx"
+    ]
+}

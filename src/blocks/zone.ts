@@ -6,7 +6,7 @@ import {flatArray} from '../utils';
 export class HyperZone extends AbstractElement {
     content: HyperValue<HvNode[]>;
     targetNodes: TargetNode[];
-    hs = new scopes.FullScope();
+    private hs = new scopes.FullScope();
 
     constructor (content: HyperValue<Children>) {
         super();

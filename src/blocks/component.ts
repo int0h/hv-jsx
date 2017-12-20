@@ -42,7 +42,7 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
     static hvComponent = true;
 
     targetNodes: TargetNode[];
-    hs = new scopes.FullScope();
+    private hs = new scopes.FullScope();
     hv: HyperValue<Children>;
     children: HvNode[];
     props: P;
