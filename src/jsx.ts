@@ -1,8 +1,6 @@
-import {hvAuto} from 'hv';
 import {HvNode, Props, Ref, Children} from './blocks/abstract';
 import {HyperElm} from './blocks/element';
 import {CustomComponent, Component, isComponentClass, FunctionComponent} from './blocks/component';
-import {HyperZone} from './blocks/zone';
 
 declare global {
     namespace JSX {
@@ -41,7 +39,14 @@ export function jsx<P extends Props>(what: string | CustomComponent<P> | Functio
     }
 
     const fc = what as FunctionComponent<P>;
-    return new HyperZone(hvAuto(() => fc(props, children)));
+    return jsx(class FC extends Component<P> {
+        render() {
+            return fc(this.props, this.children);
+        }
+    }, props, ...children);
+
+    // const fc = what as FunctionComponent<P>;
+    // return new HyperZone(hvAuto(() => fc(props, children)));
 }
 
 export type JsxFn = typeof jsx;

@@ -3,6 +3,7 @@ import {Dict, NestedArray} from '../utils';
 import {Target} from '../target';
 
 export abstract class AbstractElement {
+    free() {}
     targetNodes: TargetNode[];
     abstract targetRender(meta: ContextMeta): TargetNode[];
 }

@@ -1,4 +1,4 @@
-import {HyperValue, hvAuto} from 'hv';
+import {HyperValue, scopes} from 'hv';
 
 import {
     PropsAbstract,
@@ -42,6 +42,7 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
     static hvComponent = true;
 
     targetNodes: TargetNode[];
+    hs = new scopes.FullScope();
     hv: HyperValue<Children>;
     children: HvNode[];
     props: P;
@@ -50,7 +51,7 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
 
     constructor (props: P, children: Children) {
         super();
-        this.children = normalizeNodeSet(children);
+        this.children = normalizeNodeSet(this.hs, children);
         this.props = props;
         this.id = componentTable.length;
         componentTable.push(this);
@@ -60,9 +61,14 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
 
     init() {}
 
+    free() {
+        this.hs.free();
+        this.children.forEach(child => child.free());
+    }
+
     targetRender(meta: ContextMeta): TargetNode[] {
         const t = meta.target;
-        const domHv = hvAuto(() => this.render());
+        const domHv = this.hs.auto(() => this.render());
         const domZone = new HyperZone(domHv);
         this.targetNodes = domZone.targetRender({
             ...meta,

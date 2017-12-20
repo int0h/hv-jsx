@@ -1,4 +1,4 @@
-import {HyperValue} from 'hv';
+import {HyperValue, scopes} from 'hv';
 
 import {
     normalizeNodeSet
@@ -18,8 +18,7 @@ interface RefProps {
     [name: string]: (value: any, target: HyperElm) => void;
 }
 
-const refProps: RefProps = {
-};
+const refProps: RefProps = {};
 
 export class HyperElm extends AbstractElement {
     targetNode: TargetNode;
@@ -28,12 +27,13 @@ export class HyperElm extends AbstractElement {
     props: PropsAbstract;
     children: HvNode[];
     ref: Ref;
+    hs = new scopes.FullScope();
 
     constructor (tagName: string, props: PropsAbstract, children: Children) {
         super();
         this.tagName = tagName;
         this.props = props || {};
-        this.children = normalizeNodeSet(children);
+        this.children = normalizeNodeSet(this.hs, children);
     }
 
     private setAttrs(meta: ContextMeta) {
@@ -53,7 +53,7 @@ export class HyperElm extends AbstractElement {
             }
             let value = props[name];
             if (value instanceof HyperValue) {
-                value.watch(newValue => {
+                this.hs.watch(value, newValue => {
                     t.setProp(meta.targetMeta, this.targetNode, name, newValue);
                 });
                 value = value.g(true);
@@ -105,5 +105,10 @@ export class HyperElm extends AbstractElement {
         }
         this.targetNodes = [this.targetNode];
         return this.targetNodes;
+    }
+
+    free() {
+        this.hs.free();
+        this.children.forEach(child => child.free());
     }
 }

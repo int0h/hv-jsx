@@ -1,4 +1,4 @@
-import {HyperValue, hvWrap} from 'hv';
+import {HyperValue, scopes} from 'hv';
 import {normalizeNodeSet} from './common';
 import {AbstractElement, HvNode, ContextMeta, TargetNode, Children} from './abstract';
 import {flatArray} from '../utils';
@@ -6,10 +6,11 @@ import {flatArray} from '../utils';
 export class HyperZone extends AbstractElement {
     content: HyperValue<HvNode[]>;
     targetNodes: TargetNode[];
+    hs = new scopes.FullScope();
 
     constructor (content: HyperValue<Children>) {
         super();
-        this.content = hvWrap(content, normalizeNodeSet);
+        this.content = this.hs.proxy(content, content => normalizeNodeSet(this.hs, content));
     }
 
     private getTargetNodes(meta: ContextMeta, elems: HvNode[], needRender: boolean): TargetNode[] {
@@ -23,7 +24,7 @@ export class HyperZone extends AbstractElement {
     targetRender(meta: ContextMeta): TargetNode[] {
         const t = meta.target;
 
-        this.content.watch((newElems, oldElems) => {
+        this.hs.watch(this.content, (newElems, oldElems) => {
             const newContent = this.getTargetNodes(meta, newElems, true);
             const oldContent = this.getTargetNodes(meta, oldElems, false);
             t.replaceSequence(meta.targetMeta, oldContent, newContent);
@@ -31,5 +32,10 @@ export class HyperZone extends AbstractElement {
 
         this.targetNodes = this.getTargetNodes(meta, this.content.g(), true);
         return this.targetNodes;
+    }
+
+    free() {
+        this.hs.free();
+        this.content.$.forEach(child => child.free());
     }
 }
