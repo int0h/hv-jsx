@@ -272,10 +272,10 @@ test('basic components', t => {
     });
 
     t.test('function as component', t => {
-        const Comp = () => '';
+        const Comp = () => <a/>;
 
         const res = renderDom(<Comp />)[0] as TextNode;
-        t.true(res instanceof TextNode, 'rendered');
+        t.true(res instanceof Elem, 'rendered');
         t.end();
     });
 

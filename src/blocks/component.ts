@@ -1,4 +1,5 @@
 import {HyperValue, scopes} from 'hv';
+import {FSType} from 'hv/types/scopes/full';
 
 import {
     PropsAbstract,
@@ -42,7 +43,8 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
     static hvComponent = true;
 
     targetNodes: TargetNode[];
-    private hs = new scopes.FullScope();
+    private renderHs: FSType = new scopes.FullScope();
+    hs: FSType = new scopes.FullScope();
     hv: HyperValue<Children>;
     children: HvNode[];
     props: P;
@@ -56,7 +58,6 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
         this.id = componentTable.length;
         componentTable.push(this);
         // this.domEe = new DomEventEmitter();
-        this.init();
     }
 
     init() {}
@@ -66,9 +67,22 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
         this.children.forEach(child => child.free());
     }
 
+    private mockHs<T>(fn: () => T): T {
+        this.renderHs.free();
+        this.renderHs = new scopes.FullScope();
+        const hsBackup = this.hs;
+        this.hs = this.renderHs;
+        const result = fn();
+        this.hs = hsBackup;
+        return result;
+    }
+
     targetRender(meta: ContextMeta): TargetNode[] {
+        this.init();
         const t = meta.target;
-        const domHv = this.hs.auto(() => this.render());
+        const domHv = this.hs.auto(() => {
+            return this.mockHs(() => this.render());
+        });
         const domZone = new HyperZone(domHv);
         this.targetNodes = domZone.targetRender({
             ...meta,

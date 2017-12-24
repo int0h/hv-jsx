@@ -28,6 +28,7 @@ export class HyperZone extends AbstractElement {
             const newContent = this.getTargetNodes(meta, newElems, true);
             const oldContent = this.getTargetNodes(meta, oldElems, false);
             t.replaceSequence(meta.targetMeta, oldContent, newContent);
+            oldElems.forEach(elem => elem.free());
         });
 
         this.targetNodes = this.getTargetNodes(meta, this.content.g(), true);
