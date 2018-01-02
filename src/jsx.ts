@@ -4,7 +4,7 @@ import {CustomComponent, Component, isComponentClass, FunctionComponent} from '.
 
 declare global {
     namespace JSX {
-        type Element = Children;
+        interface Element extends HvNode {}
 
         interface ElementClass<P> {
             render: () => Children;
