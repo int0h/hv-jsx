@@ -1,4 +1,5 @@
 import {HyperValue, scopes} from 'hv';
+import {FSType} from 'hv/types/scopes/full';
 
 import {
     normalizeNodeSet
@@ -14,8 +15,12 @@ import {
     TargetNode
 } from './abstract';
 
+export interface RefHandler<T> {
+    (value: T, owner: HyperElm, hs: FSType): void;
+}
+
 interface RefProps {
-    [name: string]: (value: any, target: HyperElm) => void;
+    [name: string]: RefHandler<any>;
 }
 
 const refProps: RefProps = {};
@@ -76,7 +81,7 @@ export class HyperElm extends AbstractElement {
         for (let key in this.props) {
             if (key in refProps) {
                 const value = this.props[key];
-                refProps[key](value, this);
+                refProps[key](value, this, this.hs);
             }
         }
     }
@@ -111,4 +116,9 @@ export class HyperElm extends AbstractElement {
         this.hs.free();
         this.children.forEach(child => child.free());
     }
+}
+
+
+export function registerGlobalProp<T>(name: string, handler: RefHandler<T>) {
+    refProps[name] = handler;
 }

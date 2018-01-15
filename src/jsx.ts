@@ -14,12 +14,18 @@ declare global {
             props: any;
         }
 
+        interface IntrinsicProps extends GlobalProps {
+            [name: string]: any;
+            // style?: HyperStyle;
+            ref?: Ref;
+        }
+
         interface IntrinsicElements {
-            [key: string]: {
-                [name: string]: any;
-                // style?: HyperStyle;
-                ref?: Ref;
-            };
+            [key: string]: IntrinsicProps;
+        }
+
+        interface GlobalProps {
+
         }
     }
 }
