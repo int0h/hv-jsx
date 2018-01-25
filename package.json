@@ -9,7 +9,6 @@
   "devDependencies": {
     "@types/node": "^8.0.19",
     "@types/tape": "^4.2.31",
-    "ava": "^0.21.0",
     "coveralls": "^2.13.1",
     "nyc": "^11.1.0",
     "tap-spec": "^4.1.1",
