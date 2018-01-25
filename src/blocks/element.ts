@@ -16,7 +16,7 @@ import {
 } from './abstract';
 
 export interface RefHandler<T> {
-    (value: T, owner: HyperElm, hs: FSType): void;
+    ({value, name, owner, hs}: {value: T, name: string, owner: HyperElm, hs: FSType}): void;
 }
 
 interface RefProps {
@@ -24,6 +24,17 @@ interface RefProps {
 }
 
 const refProps: RefProps = {};
+
+export type RefPropPattern = RegExp;
+
+export const refPropPatterns = [] as Array<{
+    matcher: RefPropPattern;
+    handler: RefHandler<any>;
+}>;
+
+function patternMatch(matcher: RefPropPattern, str: string): boolean {
+    return matcher.test(str);
+}
 
 export class HyperElm extends AbstractElement {
     targetNode: TargetNode;
@@ -53,9 +64,12 @@ export class HyperElm extends AbstractElement {
             props = meta.mapAttrs(props);
         }
         for (let name in props) {
-            if (name in refProps) {
+            const isPatternProp = refPropPatterns
+                .some(({matcher}) => patternMatch(matcher, name));
+            if (name in refProps || isPatternProp) {
                 continue;
             }
+
             let value = props[name];
             if (value instanceof HyperValue) {
                 this.hs.watch(value, newValue => {
@@ -78,11 +92,21 @@ export class HyperElm extends AbstractElement {
     }
 
     private handleRefProps() {
-        for (let key in this.props) {
-            if (key in refProps) {
-                const value = this.props[key];
-                refProps[key](value, this, this.hs);
+        const owner = this;
+        const hs = this.hs;
+
+        for (let name in this.props) {
+            const value = this.props[name];
+
+            if (name in refProps) {
+                refProps[name]({value, name, owner, hs});
             }
+
+            refPropPatterns.forEach(({handler, matcher}) => {
+                if (patternMatch(matcher, name)) {
+                    handler({value, name, owner, hs});
+                }
+            })
         }
     }
 
@@ -119,6 +143,11 @@ export class HyperElm extends AbstractElement {
 }
 
 
-export function registerGlobalProp<T>(name: string, handler: RefHandler<T>) {
-    refProps[name] = handler;
+export function registerGlobalProp<T>(matcher: string | RefPropPattern, handler: RefHandler<T>) {
+    if (typeof matcher === 'string') {
+        refProps[matcher] = handler;
+        return;
+    }
+
+    refPropPatterns.push({matcher, handler});
 }
