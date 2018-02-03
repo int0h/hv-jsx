@@ -8,3 +8,5 @@ export {Target} from './target';
 export {targetRenderChildren} from './blocks/common';
 
 export {registerGlobalProp} from './blocks/element';
+
+export {debugTargetProxy} from './debug';

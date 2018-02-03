@@ -18,7 +18,8 @@
         ],
         "noUnusedLocals": true,
         "jsx": "react",
-        "jsxFactory": "jsx"
+        "jsxFactory": "jsx",
+        "experimentalDecorators": true
     },
     "include": [
         "./src/index.ts",

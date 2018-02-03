@@ -2,6 +2,7 @@ import {HyperValue, scopes} from 'hv';
 import {normalizeNodeSet} from './common';
 import {AbstractElement, HvNode, ContextMeta, TargetNode, Children} from './abstract';
 import {flatArray} from '../utils';
+import {renderDebug} from '../debug';
 
 export class HyperZone extends AbstractElement {
     content: HyperValue<HvNode[]>;
@@ -13,6 +14,7 @@ export class HyperZone extends AbstractElement {
         this.content = this.hs.proxy(content, content => normalizeNodeSet(this.hs, content));
     }
 
+    @renderDebug
     private getTargetNodes(meta: ContextMeta, elems: HvNode[], needRender: boolean): TargetNode[] {
         return flatArray<TargetNode>(elems.map(elem => {
             return needRender
@@ -25,10 +27,10 @@ export class HyperZone extends AbstractElement {
         const t = meta.target;
 
         this.hs.watch(this.content, (newElems, oldElems) => {
-            const newContent = this.getTargetNodes(meta, newElems, true);
             const oldContent = this.getTargetNodes(meta, oldElems, false);
-            t.replaceSequence(meta.targetMeta, oldContent, newContent);
             oldElems.forEach(elem => elem.free());
+            const newContent = this.getTargetNodes(meta, newElems, true);
+            t.replaceSequence(meta.targetMeta, oldContent, newContent);
         });
 
         this.targetNodes = this.getTargetNodes(meta, this.content.g(), true);

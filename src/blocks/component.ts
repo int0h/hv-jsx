@@ -1,6 +1,8 @@
 import {HyperValue, scopes} from 'hv';
 import {FSType} from 'hv/types/scopes/full';
 
+import {renderDebug} from '../debug';
+
 import {
     PropsAbstract,
     HvNode,
@@ -77,6 +79,7 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
         return result;
     }
 
+    @renderDebug
     targetRender(meta: ContextMeta): TargetNode[] {
         this.init();
         const t = meta.target;
