@@ -2,7 +2,6 @@ import {AbstractElement, ContextMeta, TargetNode} from './abstract';
 
 export class StringElm extends AbstractElement {
     text: string;
-    targetNodes: TargetNode[];
 
     constructor (text: string) {
         super();

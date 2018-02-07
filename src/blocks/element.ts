@@ -38,11 +38,10 @@ function patternMatch(matcher: RefPropPattern, str: string): boolean {
 
 export class HyperElm extends AbstractElement {
     targetNode: TargetNode;
-    targetNodes: TargetNode[];
     tagName: string;
     props: PropsAbstract;
     children: HvNode[];
-    ref: Ref;
+    ref?: Ref;
     private hs = new scopes.FullScope();
 
     constructor (tagName: string, props: PropsAbstract, children: Children) {
@@ -106,7 +105,7 @@ export class HyperElm extends AbstractElement {
                 if (patternMatch(matcher, name)) {
                     handler({value, name, owner, hs});
                 }
-            })
+            });
         }
     }
 

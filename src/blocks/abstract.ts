@@ -4,7 +4,8 @@ import {Target} from '../target';
 
 export abstract class AbstractElement {
     free() {}
-    targetNodes: TargetNode[];
+    targetNodes: TargetNode[] | null = null;
+    hash!: string;
     abstract targetRender(meta: ContextMeta): TargetNode[];
 }
 

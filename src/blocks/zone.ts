@@ -6,7 +6,6 @@ import {renderDebug} from '../debug';
 
 export class HyperZone extends AbstractElement {
     content: HyperValue<HvNode[]>;
-    targetNodes: TargetNode[];
     private hs = new scopes.FullScope();
 
     constructor (content: HyperValue<Children>) {

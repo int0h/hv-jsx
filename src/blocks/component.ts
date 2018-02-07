@@ -44,10 +44,9 @@ function injectId(id: number) {
 export abstract class Component<P extends PropsAbstract> extends AbstractElement {
     static hvComponent = true;
 
-    targetNodes: TargetNode[];
     private renderHs: FSType = new scopes.FullScope();
     hs: FSType = new scopes.FullScope();
-    hv: HyperValue<Children>;
+    hv!: HyperValue<Children>;
     children: HvNode[];
     props: P;
     id: number;
