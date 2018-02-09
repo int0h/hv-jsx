@@ -4,9 +4,10 @@ import {Target} from '../target';
 
 export abstract class AbstractElement {
     free() {}
-    targetNodes: TargetNode[] | null = null;
+    targetNodes!: TargetNode[];
     hash!: string;
     abstract targetRender(meta: ContextMeta): TargetNode[];
+    abstract merge(meta: ContextMeta, newBlock: AbstractElement): AbstractElement;
 }
 
 export declare class As<S extends string> {

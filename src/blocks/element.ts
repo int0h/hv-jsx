@@ -1,5 +1,7 @@
 import {HyperValue, scopes} from 'hv';
 import {FSType} from 'hv/types/scopes/full';
+import {hashBlock, hashDict, stringify, hashArray} from '../hash';
+import {mergeChildren} from '../merge';
 
 import {
     normalizeNodeSet
@@ -42,17 +44,55 @@ export class HyperElm extends AbstractElement {
     props: PropsAbstract;
     children: HvNode[];
     ref?: Ref;
+    childrenHash: string;
+    propHash: string;
     private hs = new scopes.FullScope();
+    private propWatchers: {[k: string]: number} = {};
 
     constructor (tagName: string, props: PropsAbstract, children: Children) {
         super();
         this.tagName = tagName;
         this.props = props || {};
         this.children = normalizeNodeSet(this.hs, children);
+        this.childrenHash = stringify(hashArray(this.children.map(child => child.hash)));
+        this.propHash = stringify(hashDict(props));
+        this.hash = hashBlock({
+            type: 'element',
+            tagName: tagName,
+            attrs: this.propHash,
+            children: this.childrenHash
+        });
+    }
+
+    private setAttr(meta: ContextMeta, name: string, value: any) {
+        const t = meta.target;
+        const isPatternProp = refPropPatterns
+            .some(({matcher}) => patternMatch(matcher, name));
+
+        if (name in refProps || isPatternProp) {
+            return;
+        }
+
+        if (value instanceof HyperValue) {
+            this.propWatchers[name] = this.hs.watch(value, newValue => {
+                t.setProp(meta.targetMeta, this.targetNode, name, newValue);
+            });
+            value = value.g(true);
+        }
+
+        t.setProp(meta.targetMeta, this.targetNode, name, value);
+    }
+
+    private delAttr(meta: ContextMeta, name: string) {
+        meta.target.setProp(meta.targetMeta, this.targetNode, name, null);
+        const watcher = this.propWatchers[name];
+        if (watcher) {
+            this.hs.unwatch(this.props[name], watcher);
+            delete this.propWatchers[name];
+        }
     }
 
     private setAttrs(meta: ContextMeta) {
-        const t = meta.target;
         let props = this.props;
         if (props.ref) {
             props = {...this.props};
@@ -63,20 +103,8 @@ export class HyperElm extends AbstractElement {
             props = meta.mapAttrs(props);
         }
         for (let name in props) {
-            const isPatternProp = refPropPatterns
-                .some(({matcher}) => patternMatch(matcher, name));
-            if (name in refProps || isPatternProp) {
-                continue;
-            }
-
             let value = props[name];
-            if (value instanceof HyperValue) {
-                this.hs.watch(value, newValue => {
-                    t.setProp(meta.targetMeta, this.targetNode, name, newValue);
-                });
-                value = value.g(true);
-            }
-            t.setProp(meta.targetMeta, this.targetNode, name, value);
+            this.setAttr(meta, name, value);
         }
     }
 
@@ -107,6 +135,40 @@ export class HyperElm extends AbstractElement {
                 }
             });
         }
+    }
+
+    private mergeProps(meta: ContextMeta, newProps: PropsAbstract) {
+        for (const name in newProps) {
+            if (name in this.props) {
+                this.delAttr(meta, name);
+            }
+            this.setAttr(meta, name, newProps[name]);
+        }
+        for (const name in this.props) {
+            if (!(name in newProps)) {
+                this.delAttr(meta, name);
+            }
+        }
+    }
+
+    merge(meta: ContextMeta, newElem: HyperElm): HyperElm {
+        if (newElem.hash === this.hash) {
+            return this;
+        }
+
+        if (newElem.tagName !== this.tagName) {
+            return newElem;
+        }
+
+        if (newElem.childrenHash !== this.childrenHash) {
+            mergeChildren(meta, this.children, newElem.children);
+        }
+
+        if (newElem.propHash !== this.propHash) {
+            this.mergeProps(meta, newElem.props);
+        }
+
+        return this;
     }
 
     targetRender(meta: ContextMeta): TargetNode[] {

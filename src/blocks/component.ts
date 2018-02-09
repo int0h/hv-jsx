@@ -20,6 +20,8 @@ import {
 
 import {HyperZone} from './zone';
 
+import {hashBlock, hashDict} from '../hash';
+
 export let componentTable: Component<any>[] = [];
 
 export interface FunctionComponent<P extends PropsAbstract> {
@@ -58,6 +60,12 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
         this.props = props;
         this.id = componentTable.length;
         componentTable.push(this);
+
+        this.hash = hashBlock({
+            type: 'component',
+            props: hashDict(props),
+            children: this.children.map(child => child.hash)
+        });
         // this.domEe = new DomEventEmitter();
     }
 
@@ -96,6 +104,10 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
             });
         }
         return this.targetNodes;
+    }
+
+    merge(meta: ContextMeta, newComp: Component<P>): Component<P> {
+        return newComp;
     }
 
     // on(eventType: string, targetId: string, handler: DomEventHandler) {
