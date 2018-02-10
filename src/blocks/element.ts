@@ -154,12 +154,16 @@ export class HyperElm extends AbstractElement {
     merge(meta: ContextMeta, newElem: HyperElm): HyperElm {
         if (newElem.hash === this.hash) {
             newElem.targetNodes = this.targetNodes;
-            return this;
+            newElem.props = this.props;
+            newElem.children = this.children;
+            return newElem;
         }
 
         if (newElem.tagName !== this.tagName) {
             return newElem;
         }
+
+        newElem.targetNodes = this.targetNodes;
 
         if (newElem.propHash !== this.propHash) {
             this.mergeProps(meta, newElem.props);
@@ -169,8 +173,7 @@ export class HyperElm extends AbstractElement {
             mergeChildren(meta, this.children, newElem.children);
         }
 
-        newElem.targetNodes = this.targetNodes;
-        return this;
+        return newElem;
     }
 
     targetRender(meta: ContextMeta): TargetNode[] {
