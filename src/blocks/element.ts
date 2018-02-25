@@ -27,27 +27,15 @@ interface RefProps {
 
 const refProps: RefProps = {};
 
-export type RefPropPattern = RegExp;
-
-export const refPropPatterns = [] as Array<{
-    matcher: RefPropPattern;
-    handler: RefHandler<any>;
-}>;
-
-function patternMatch(matcher: RefPropPattern, str: string): boolean {
-    return matcher.test(str);
-}
-
 export class HyperElm extends AbstractElement {
     targetNode: TargetNode;
     tagName: string;
     props: PropsAbstract;
     children: HvNode[];
-    ref?: Ref;
     childrenHash: string;
     propHash: string;
     private hs = new scopes.FullScope();
-    private propWatchers: {[k: string]: number} = {};
+    private propHv: HyperValue<PropsAbstract> | null = null;
 
     constructor (tagName: string, props: PropsAbstract, children: Children) {
         super();
@@ -64,48 +52,49 @@ export class HyperElm extends AbstractElement {
         });
     }
 
-    private setAttr(meta: ContextMeta, name: string, value: any) {
-        const t = meta.target;
-        const isPatternProp = refPropPatterns
-            .some(({matcher}) => patternMatch(matcher, name));
+    private initAttrs(meta: ContextMeta) {
+        this.propHv = new HyperValue({});
 
-        if (name in refProps || isPatternProp) {
-            return;
-        }
+        this.hs.watch(this.propHv, (newAttrs, oldAttrs) => {
+            const diff: PropsAbstract = {};
+            for (const name in newAttrs) {
+                diff[name] = newAttrs[name];
+            }
 
-        if (value instanceof HyperValue) {
-            this.propWatchers[name] = this.hs.watch(value, newValue => {
-                t.setProp(meta.targetMeta, this.targetNode, name, newValue);
-            });
-            value = value.g(true);
-        }
+            for (const name in oldAttrs) {
+                if (!(name in newAttrs)) {
+                    diff[name] = null;
+                }
+            }
 
-        t.setProp(meta.targetMeta, this.targetNode, name, value);
-    }
+            for (const name in diff) {
+                if (name in refProps) {
+                    continue;
+                }
+                meta.target.setProp(meta.targetMeta, this.targetNode, name, diff[name]);
+            }
 
-    private delAttr(meta: ContextMeta, name: string) {
-        meta.target.setProp(meta.targetMeta, this.targetNode, name, null);
-        const watcher = this.propWatchers[name];
-        if (watcher) {
-            this.hs.unwatch(this.props[name], watcher);
-            delete this.propWatchers[name];
-        }
-    }
+            for (const name in diff) {
+                if (name in refProps) {
+                    refProps[name]({
+                        name,
+                        value: diff[name],
+                        hs: this.hs,
+                        owner: this
+                    });
+                }
+            }
+        });
 
-    private setAttrs(meta: ContextMeta) {
-        let props = this.props;
-        if (props.ref) {
-            props = {...this.props};
-            this.ref = props.ref;
-            delete props.ref;
-        }
-        if (meta.mapAttrs) {
-            props = meta.mapAttrs(props);
-        }
-        for (let name in props) {
-            let value = props[name];
-            this.setAttr(meta, name, value);
-        }
+        this.hs.bind(this.propHv, () => {
+            const propObj: PropsAbstract = {};
+
+            for (const name in this.props) {
+                propObj[name] = this.hs.read(this.props[name]);
+            }
+
+            return propObj;
+        });
     }
 
     private setChildren(meta: ContextMeta, nestedMeta: ContextMeta) {
@@ -118,37 +107,12 @@ export class HyperElm extends AbstractElement {
         }
     }
 
-    private handleRefProps() {
-        const owner = this;
-        const hs = this.hs;
-
-        for (let name in this.props) {
-            const value = this.props[name];
-
-            if (name in refProps) {
-                refProps[name]({value, name, owner, hs});
-            }
-
-            refPropPatterns.forEach(({handler, matcher}) => {
-                if (patternMatch(matcher, name)) {
-                    handler({value, name, owner, hs});
-                }
-            });
-        }
-    }
-
     private mergeProps(meta: ContextMeta, newProps: PropsAbstract) {
-        for (const name in newProps) {
-            if (name in this.props) {
-                this.delAttr(meta, name);
-            }
-            this.setAttr(meta, name, newProps[name]);
+        if (!this.propHv) {
+            throw new Error('merge before render');
         }
-        for (const name in this.props) {
-            if (!(name in newProps)) {
-                this.delAttr(meta, name);
-            }
-        }
+
+        this.propHv.$ = newProps;
     }
 
     merge(meta: ContextMeta, newElem: HyperElm): HyperElm {
@@ -163,7 +127,9 @@ export class HyperElm extends AbstractElement {
             return newElem;
         }
 
+        newElem.targetNode = this.targetNode;
         newElem.targetNodes = this.targetNodes;
+        newElem.propHv = this.propHv;
 
         if (newElem.propHash !== this.propHash) {
             this.mergeProps(meta, newElem.props);
@@ -192,12 +158,8 @@ export class HyperElm extends AbstractElement {
             targetMeta: selfTargetMeta
         };
         this.targetNode = elem;
-        this.setAttrs(selfMeta);
+        this.initAttrs(selfMeta);
         this.setChildren(selfMeta, nestedMeta);
-        this.handleRefProps();
-        if (this.ref) {
-            this.ref(this);
-        }
         this.targetNodes = [this.targetNode];
         return this.targetNodes;
     }
@@ -209,11 +171,10 @@ export class HyperElm extends AbstractElement {
 }
 
 
-export function registerGlobalProp<T>(matcher: string | RefPropPattern, handler: RefHandler<T>) {
-    if (typeof matcher === 'string') {
-        refProps[matcher] = handler;
-        return;
-    }
-
-    refPropPatterns.push({matcher, handler});
+export function registerGlobalProp<T>(matcher: string, handler: RefHandler<T>) {
+    refProps[matcher] = handler;
 }
+
+registerGlobalProp('ref', ({owner, value}) => {
+    (value as Ref)(owner);
+});
