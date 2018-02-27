@@ -1,4 +1,4 @@
-import {HyperValue} from 'hv';
+import {HyperValue} from 'hyper-value';
 import {Dict, NestedArray} from '../utils';
 import {Target} from '../target';
 

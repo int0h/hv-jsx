@@ -1,5 +1,5 @@
-import {HyperValue, scopes} from 'hv';
-import {FSType} from 'hv/types/scopes/full';
+import {HyperValue, scopes} from 'hyper-value';
+import {FSType} from 'hyper-value/types/scopes/full';
 
 import {renderDebug} from '../debug';
 

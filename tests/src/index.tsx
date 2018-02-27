@@ -1,6 +1,6 @@
 import test = require('tape');
 
-import {HyperValue} from 'hv';
+import {HyperValue} from 'hyper-value';
 import {jsx, Component, Children} from '../..';
 // import {isComponentClass} from '../../src/blocks/component';
 import {renderDom, Elem, TextNode, Placeholder} from 'hv-jsx-mock';

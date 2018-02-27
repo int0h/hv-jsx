@@ -1,4 +1,4 @@
-import {HyperValue, scopes} from 'hv';
+import {HyperValue, scopes} from 'hyper-value';
 import {normalizeNodeSet} from './common';
 import {AbstractElement, HvNode, ContextMeta, TargetNode, Children} from './abstract';
 import {flatArray} from '../utils';

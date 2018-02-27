@@ -1,5 +1,5 @@
 
-import {HyperValue, scopes} from 'hv';
+import {HyperValue, scopes} from 'hyper-value';
 import {AbstractElement, HvNode, Children, TargetNode, ContextMeta} from './abstract';
 import {flatArray} from '../utils';
 import {StringElm} from './string';

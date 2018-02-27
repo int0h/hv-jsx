@@ -2,7 +2,7 @@
 // import {HyperZone} from './blocks/zone';
 import {Dict} from './utils';
 import {Target} from './target';
-import {tracer} from 'hv';
+import {tracer} from 'hyper-value';
 
 // interface RenderInfo {
 //     name: string;
