@@ -15,7 +15,6 @@ declare global {
         }
 
         interface IntrinsicProps extends GlobalProps {
-            // style?: HyperStyle;
             ref?: Ref;
         }
 

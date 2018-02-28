@@ -157,7 +157,9 @@ export const renderDebug = tracer.traceMethod(target => (target.constructor as a
 
 declare const window: any;
 
-window.createReport = createReport;
+if (typeof window !== 'undefined') {
+    window.createReport = createReport;
+}
 
 function createReport(data: FlameReport) {
     const json = JSON.stringify(data);

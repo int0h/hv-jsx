@@ -5,6 +5,14 @@ import {jsx, Component, Children} from '../..';
 // import {isComponentClass} from '../../src/blocks/component';
 import {renderDom, Elem, TextNode, Placeholder} from 'hv-jsx-mock';
 
+declare global {
+    namespace JSX {
+        interface IntrinsicProps extends GlobalProps {
+            [key: string]: any;
+        }
+    }
+}
+
 test('jsx works', t => {
     <div />;
     t.pass('jsx works');

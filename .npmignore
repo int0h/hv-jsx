@@ -1,0 +1,7 @@
+.vscode
+src
+.travis.yml
+tsconfig.json
+tslint.json
+.nyc_output
+tests
