@@ -21,5 +21,7 @@
   "scripts": {
     "test": "tsc -p ./tests/tsconfig.json && node_modules/.bin/nyc ./node_modules/.bin/tape ./tests/dist/*.js | ./node_modules/.bin/tap-spec"
   },
-  "dependencies": {}
+  "dependencies": {
+    "hyper-value": "^0.1.0"
+  }
 }
