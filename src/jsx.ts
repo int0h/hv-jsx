@@ -19,7 +19,6 @@ declare global {
         }
 
         interface IntrinsicElements {
-            [key: string]: IntrinsicProps;
         }
 
         interface GlobalProps {
@@ -34,6 +33,10 @@ export function jsx<P extends Props>(what: string | CustomComponent<P> | Functio
     }
 
     if (typeof what === 'string') {
+        const globalElem = globalElems[what];
+        if (globalElem) {
+            return jsx(globalElem, props, ...children);
+        }
         return new HyperElm(what, props, children);
     }
 
@@ -51,4 +54,10 @@ export function jsx<P extends Props>(what: string | CustomComponent<P> | Functio
 }
 
 export type JsxFn = typeof jsx;
+
+let globalElems: {[key: string]: CustomComponent<any>} = {};
+
+export function registerGlobalElem<N extends keyof JSX.IntrinsicElements>(name: N, comp: CustomComponent<JSX.IntrinsicElements[N]>) {
+    globalElems[name] = comp;
+}
 

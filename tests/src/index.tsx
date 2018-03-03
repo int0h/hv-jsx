@@ -10,6 +10,10 @@ declare global {
         interface IntrinsicProps extends GlobalProps {
             [key: string]: any;
         }
+
+        interface IntrinsicElements {
+            [key: string]: IntrinsicProps;
+        }
     }
 }
 
