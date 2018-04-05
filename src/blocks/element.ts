@@ -1,5 +1,7 @@
-import {HyperValue, scopes} from 'hyper-value';
-import {FSType} from 'hyper-value/types/scopes/full';
+import {HyperValue, HyperScope} from 'hyper-value';
+import {bind} from 'hyper-value/hs/bind';
+import {read} from 'hyper-value/hs/read';
+
 import {hashBlock, hashDict, stringify, hashArray} from '../hash';
 import {mergeChildren} from '../merge';
 
@@ -18,7 +20,7 @@ import {
 } from './abstract';
 
 export interface RefHandler<T> {
-    ({value, name, owner, hs}: {value: T, name: string, owner: HyperElm, hs: FSType}): void;
+    ({value, name, owner, hs}: {value: T, name: string, owner: HyperElm, hs: HyperScope}): void;
 }
 
 interface RefProps {
@@ -34,7 +36,7 @@ export class HyperElm extends AbstractElement {
     children: HvNode[];
     childrenHash: string;
     propHash: string;
-    private hs = new scopes.FullScope();
+    private hs = new HyperScope();
     private propHv: HyperValue<PropsAbstract> | null = null;
 
     constructor (tagName: string, props: PropsAbstract, children: Children) {
@@ -86,11 +88,11 @@ export class HyperElm extends AbstractElement {
             }
         });
 
-        this.hs.bind(this.propHv, () => {
+        bind(this.hs, this.propHv, () => {
             const propObj: PropsAbstract = {};
 
             for (const name in this.props) {
-                propObj[name] = this.hs.read(this.props[name]);
+                propObj[name] = read(this.props[name]);
             }
 
             return propObj;

@@ -1,4 +1,6 @@
-import {HyperValue, scopes} from 'hyper-value';
+import {HyperValue, HyperScope} from 'hyper-value';
+import {proxy} from 'hyper-value/hs/proxy';
+
 import {normalizeNodeSet} from './common';
 import {AbstractElement, HvNode, ContextMeta, TargetNode, Children} from './abstract';
 import {flatArray} from '../utils';
@@ -8,11 +10,11 @@ import {hashBlock, hash} from '../hash';
 
 export class HyperZone extends AbstractElement {
     content: HyperValue<HvNode[]>;
-    private hs = new scopes.FullScope();
+    private hs = new HyperScope();
 
     constructor (content: HyperValue<Children>) {
         super();
-        this.content = this.hs.proxy(content, content => normalizeNodeSet(this.hs, content));
+        this.content = proxy(this.hs, content, content => normalizeNodeSet(this.hs, content));
         this.hash = hashBlock({
             type: 'HyperZone',
             content: hash(content)

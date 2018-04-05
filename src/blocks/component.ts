@@ -1,5 +1,5 @@
-import {HyperValue, scopes} from 'hyper-value';
-import {FSType} from 'hyper-value/types/scopes/full';
+import {HyperValue, HyperScope} from 'hyper-value';
+import {auto} from 'hyper-value/hs/auto';
 
 import {renderDebug} from '../debug';
 
@@ -46,8 +46,8 @@ function injectId(id: number) {
 export abstract class Component<P extends PropsAbstract> extends AbstractElement {
     static hvComponent = true;
 
-    private renderHs: FSType = new scopes.FullScope();
-    hs: FSType = new scopes.FullScope();
+    private renderHs = new HyperScope();
+    hs = new HyperScope();
     hv!: HyperValue<Children>;
     children: HvNode[];
     props: P;
@@ -78,7 +78,7 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
 
     private mockHs<T>(fn: () => T): T {
         this.renderHs.free();
-        this.renderHs = new scopes.FullScope();
+        this.renderHs = new HyperScope();
         const hsBackup = this.hs;
         this.hs = this.renderHs;
         const result = fn();
@@ -90,7 +90,7 @@ export abstract class Component<P extends PropsAbstract> extends AbstractElement
     targetRender(meta: ContextMeta): TargetNode[] {
         this.init();
         const t = meta.target;
-        const domHv = this.hs.auto(() => {
+        const domHv = auto(this.hs, () => {
             return this.mockHs(() => this.render());
         });
         const domZone = new HyperZone(domHv);

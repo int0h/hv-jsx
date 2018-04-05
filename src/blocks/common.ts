@@ -1,12 +1,14 @@
 
-import {HyperValue, scopes} from 'hyper-value';
+import {HyperValue, HyperScope} from 'hyper-value';
+import {proxy} from 'hyper-value/hs/proxy';
+
 import {AbstractElement, HvNode, Children, TargetNode, ContextMeta} from './abstract';
 import {flatArray} from '../utils';
 import {StringElm} from './string';
 import {HyperZone} from './zone';
 import {PlaceholderElm} from './placeholder';
 
-export function normalizeNodeSet(hs: scopes.ProxyScope, children: Children): HvNode[] {
+export function normalizeNodeSet(hs: HyperScope, children: Children): HvNode[] {
     if (typeof children === 'string') {
         return [new StringElm(children)];
     }
@@ -29,14 +31,14 @@ export function normalizeNodeSet(hs: scopes.ProxyScope, children: Children): HvN
             : [new PlaceholderElm()];
     }
     if (children instanceof HyperValue) {
-        const content = hs.proxy(children, normalize);
+        const content = proxy(hs, children, normalize);
         return [new HyperZone(content)];
     }
     throw new Error('invalid child');
 }
 
 export function targetRenderChildren(meta: ContextMeta, children: Children): TargetNode[] {
-    const hs = new scopes.ProxyScope();
+    const hs = new HyperScope();
 
     return flatArray(
         normalizeNodeSet(hs, children)
